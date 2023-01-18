@@ -25,8 +25,8 @@ export default function Home() {
           </h1>
         </div>
         <div className="w-[400px] m-auto ">
-          <div className="container m-auto grid grid-cols-9">
-            {sudo.map((i:number)=><div>{i}</div>)}
+          <div className="[&>*:nth-child(odd)]:bg-blue-500 container m-auto grid grid-cols-9">
+            {sudo.map((i:number, idx:number)=><div key={idx}>{i}</div>)}
           </div>
         </div>
       </main>
