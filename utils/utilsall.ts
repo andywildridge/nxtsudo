@@ -268,54 +268,6 @@ for(let idx=0; idx<81; idx++) {
         pss.set(idx, new Set([...(VALIDNUMBERS.filter(i=>!([...all].includes(i))))]));
     }  
 }
-//generics
-function g<T>(val: T){
-    return {
-        val,
-        isTrue: true
-    }
-}
-
-console.log(g("1"));
-
-const f = <T>(val: T) => ({
-    val,
-    isTrue: true
-});
-
-function a(arr: ReadonlyArray<number>){
-    //arr.push(1);
-    return arr;
-}
-
-console.log(a([1,2,3]));
-
-console.log(f(1));
-//generics
-
-class C {
-    name: string;
-    constructor(name: string) {
-        this.name = name;
-    }
-    method() {
-        return "Hello, " + this.name;
-    }
-}
-
-class D extends C {
-    constructor(name: string) {
-        super(name);
-    }
-    method() {
-        return "yo, " + this.name;
-    }
-}
-
-let cc = new C("andy");
-let dd = new D("andy");
-
-console.log(cc.method(), dd.method());
 
 //initialise over
 // we have poss/pss & solved

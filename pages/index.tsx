@@ -1,13 +1,10 @@
 import Head from 'next/head'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
-import { data } from './data'
-import { sudo } from './sudo'
+import { solver } from '../utils/sudokuSolver'
 
 const inter = Inter({ subsets: ['latin'] })
-
-console.log(data);
 
 export default function Home() {
   return (
@@ -21,12 +18,12 @@ export default function Home() {
       <main className="m-auto">
         <div className={styles.description}>
           <h1 className="text-3xl font-bold underline">
-            Sudoku!
+            Sudoku! <div>{solver.a.idx}</div>
           </h1>
         </div>
         <div className="w-[400px] m-auto ">
           <div className="[&>*:nth-child(odd)]:bg-blue-500 container m-auto grid grid-cols-9">
-            {sudo.map((i:number, idx:number)=><div key={idx}>{i}</div>)}
+            {solver.sudo.map((i:number, idx:number)=><div key={idx}>{i}</div>)}
           </div>
         </div>
       </main>
