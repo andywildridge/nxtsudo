@@ -43,12 +43,13 @@ export default function Home() {
           </h1>
         </div>
         <div className="w-[400px] m-auto ">
-          <div className="[&>*:nth-child(odd)]:bg-blue-500 container m-auto grid grid-cols-9">
+          <div className="[&>*:nth-child(odd)]:border-dashed [&>*:nth-child(odd)]:border-2 [&>*:nth-child(odd)]:border-indigo-600 bcontainer m-auto grid grid-cols-9">
             {
               grid.map((i:undefined, idx: number) => {
                 const solved = sudoState.solved.get(idx);
-                const possibles = sudoState.possibles.get(idx)?.size ? [...sudoState.possibles.get(idx)] : [];
-                return <div key={idx}>{solved && solved}{
+                const possibles = [...(sudoState.possibles.get(idx) || [])];  // handle destrucure undefined 
+                const squareStyle = `${sudoState.initial.get(idx) ? 'font-bold' : ''} ${idx === 0 ?  'bg-red-500' : ''}`;
+                return <div className={squareStyle} key={idx}>{solved && solved}{
                   possibles.map((possible: number, idx: number) => (
                     <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
                   ))

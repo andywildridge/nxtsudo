@@ -38,9 +38,11 @@ let rcbs = rcb(sudo);
 
 const possibles = new Map();
 const initial = new Map<number, number>();
+const solved = new Map<number, number>();
 for (let idx = 0; idx < 81; idx++) {
   if (sudo[idx] !== 0) {
     initial.set(idx, sudo[idx]);
+    solved.set(idx, sudo[idx]);
   }
   let all = new Set([
     ...(rcbs.get(`row.${indexToRow(idx).idx}`) || []),
@@ -58,5 +60,5 @@ for (let idx = 0; idx < 81; idx++) {
 export const info = {
   initial,
   possibles,
-  solved: initial
+  solved
 }
