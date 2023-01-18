@@ -23,7 +23,13 @@ export default function Home() {
         </div>
         <div className="w-[400px] m-auto ">
           <div className="[&>*:nth-child(odd)]:bg-blue-500 container m-auto grid grid-cols-9">
-            {solver.sudo.map((i:number, idx:number)=><div key={idx}>{i}</div>)}
+            {solver.sudo.map((el: { solved: number, possibles: Array<number> }, idx:number) => {
+              return <div key={idx}>
+                {el.solved > 0 && el.solved}{el.possibles.map((possible: number, idx: number) => (
+                  <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
+                  ))}
+                </div>
+            })}
           </div>
         </div>
       </main>

@@ -6,7 +6,10 @@ export const solver = {
   get sudo() {
     const aggregate = [];
     for(let i=0; i<81; i++) {
-      aggregate.push(info.solved.get(i) || 0);
+      aggregate.push({
+        solved: info.solved.get(i) || 0,
+        possibles: info.pss.get(i) ? [...info.pss.get(i)] : []
+      });
     }
     return aggregate;
   }
