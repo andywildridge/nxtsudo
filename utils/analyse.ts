@@ -1,9 +1,11 @@
 // import { indexToRow, indexToCol, indexToBox, indexToSegH, indexToSegV, groupIndeces } from './indexTransforms'
-import { Collections, CollectionsGroup } from './collections';
+// import { Collections, CollectionsGroup } from './collections';
 import { sortPossibles } from './sortPossibles';
 import { getSegementDeletors } from './segmentSkewers';
+import { getGroupClusters } from './getGroupClusters';
+import { findSolvable } from './findSolvable';
 
- export const analyse = (pss: ReadonlyMap<number, Set<number>>) => {
+ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     //pss.set(1, new Set([1]))
     /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,60 +20,15 @@ import { getSegementDeletors } from './segmentSkewers';
     //console.log(outs.values);
     //console.log(segs);
     //function find seg skewers
-    const { outs, segs} = sortPossibles(pss);
+    const { outs, segs} = sortPossibles(possibles);
 
-    const segDeletors = getSegementDeletors(pss, segs);
+    const segDeletors = getSegementDeletors(possibles, segs);
 
-    //function find group clusters
-    //fold groups into row 0, clusters boxes (in lines)?
-    //fold groups into rows/cols, , number n, clusters
-    // func clusters = getClusters(outs)
-    const clusters = new CollectionsGroup();
-    for (let [key, poss] of outs.values) {
-        //type,index number/possible clusters
-        clusters.add({
-            value: ~~key.split('.')[1].split(':')[1],
-            type: key.split('.')[0].split(':')[0],
-            index: ~~key.split('.')[0].split(':')[1],
-            positions: [...poss]
-        });
-        
-        //type,number index/possible clusters
-        clusters.add({
-            value: ~~key.split('.')[0].split(':')[1],
-            type: `${key.split('.')[0].split(':')[0]}.num`,
-            index: ~~key.split('.')[1].split(':')[1],
-            positions: [...poss]
-        });
-        
-    }
-    //console.log(clusters.values);
+    const groupClusters = getGroupClusters(outs);
 
+    const setters = findSolvable(possibles);
 
-
-
-
-    //console.log('G',groups);
-    // singles/cam_solve = cansolve(pss);
-    const setters = [];
-    //square singles
-    for(let [key, item] of pss) {
-        if(item.size === 1){
-            //console.log(key, item);
-            setters.push({key, item});
-        }
-    }
-
-    /*
-    //func groupsOf clusters = getGroups(clusters)
-    const groups = [];
-    // singles
-    groups.forEach(i=>{
-        if(i.numbers.size === 1) {
-            console.log(i);
-            setters.push({key: groupIndeces[i.type](i.index)[i.positions[0]], item: i.numbers});
-        }
-    });
+/*
 
     interface StringMap { [key: string]: any; }
 
