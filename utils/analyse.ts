@@ -5,7 +5,7 @@ import { getSegementDeletors } from './segmentSkewers';
 import { getGroupClusters } from './getGroupClusters';
 import { findSolvable } from './findSolvable';
 
- export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
+export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     //pss.set(1, new Set([1]))
     /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,13 +20,13 @@ import { findSolvable } from './findSolvable';
     //console.log(outs.values);
     //console.log(segs);
     //function find seg skewers
-    const { outs, segs} = sortPossibles(possibles);
+    const { groups, segments } = sortPossibles(possibles);
 
-    const segDeletors = getSegementDeletors(possibles, segs);
+    const segDeletors = getSegementDeletors(possibles, segments);
 
-    const groupClusters = getGroupClusters(outs);
+    const groupClusters = getGroupClusters(groups);
 
-    const setters = findSolvable(possibles);
+    const solvable = findSolvable(possibles);
 
 /*
 
@@ -53,10 +53,11 @@ import { findSolvable } from './findSolvable';
     //console.log(pss);
     //console.log(deletors);
     return {
-        setters,
+        solvable,
         //deletors,
         //deletorsAll,
         segDeletors
+        //removable/deletable
     }
 
 }

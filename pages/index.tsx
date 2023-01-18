@@ -9,15 +9,18 @@ const inter = Inter({ subsets: ['latin'] })
 
 const grid: ReadonlyArray<undefined> = new Array(81).fill(undefined);
 
+// solved and solvable, analysis = removable/deletable
+
 export default function Home() {
   const [ sudoState, setSudoState ] = useState(initVals);
 
   const solveSquare = ((idx: number, number: number)=>{
-    const { solved, possibles, analysis } = sudoState;
+    const { initial, solved, possibles, analysis } = sudoState;
     solved.set(0, 1);
     possibles.delete(0);
     console.log(analysis);
     setSudoState({
+      initial,
       solved,
       possibles,
       analysis
