@@ -1,22 +1,24 @@
 import { indexToRow, indexToCol, indexToBox, indexToSegH, indexToSegV, groupIndeces } from './indexTransforms'
 
-class Collections {
-    private data: Map<string, Set<number>>;
+class CollectionsG<MapValType> {
+    protected data: Map<string, MapValType>;
+    constructor () {
+        this.data = new Map();
+    }
+
+    get values() { return this.data; }
+}
+
+class Collections extends CollectionsG<Set<number>> {
     constructor() {
-      this.data = new Map();
+        super();
     }
-  
-    get values() {
-      return this.data;
+    add = (key: string, value: number):void => { // setter
+        if(!this.data.has(key)){
+            this.data.set(key, new Set());
+        }
+        this.data.get(key)?.add(value);
     }
-  
-    add = (key: string, value: number): void => {
-      // setter
-      if (!this.data.has(key)) {
-        this.data.set(key, new Set());
-      }
-      this.data.get(key)?.add(value);
-    };
 }
 
 type clusterType = {
@@ -34,14 +36,10 @@ type C3params = {
     positions: Array<number>;
 }
 
-class Collection3 {
-    private data: Map<string, Map<string, clusterType>>;
-    constructor () {
-        this.data = new Map();
+class CollectionsGroup extends CollectionsG<Map<string, clusterType>> {
+    constructor() {
+        super();
     }
-
-    get values() { return this.data; }
-
     add = (params: C3params):void => { // setter
         const { value, type, index, positions } = params;
         const key = `${type}.${index}`;
@@ -127,7 +125,7 @@ class Collection3 {
     //fold groups into row 0, clusters boxes (in lines)?
     //fold groups into rows/cols, , number n, clusters
     // func clusters = getClusters(outs)
-    const clusters = new Collection3();
+    const clusters = new CollectionsGroup();
     for (let [key, poss] of outs.values) {
         //type,index number/possible clusters
         clusters.add({
