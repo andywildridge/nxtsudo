@@ -1,5 +1,7 @@
-import { indexToRow, indexToCol, indexToBox, indexToSegH, indexToSegV, groupIndeces } from './indexTransforms'
+// import { indexToRow, indexToCol, indexToBox, indexToSegH, indexToSegV, groupIndeces } from './indexTransforms'
 import { Collections, CollectionsGroup } from './collections';
+import { sortPossibles } from './sortPossibles';
+import { getSegementDeletors } from './segmentSkewers';
 
  export const analyse = (pss: ReadonlyMap<number, Set<number>>) => {
     //pss.set(1, new Set([1]))
@@ -12,58 +14,13 @@ import { Collections, CollectionsGroup } from './collections';
     //group.add('seg.1.num.2',3);
     // can filter singles/only number possible in col, square, box groups (but no need as grouping? - no only check doubles? tidier for highlighting removables)
     //function outs = getRCBs(pss) / segs = getSegs(pss)
-    let outs = new Collections();
-    let segs = new Map();
-    for (let [idx, poss] of pss) {
-        let r = indexToRow(idx);
-        let c = indexToCol(idx);
-        let b = indexToBox(idx);
-        let h = indexToSegH(idx);
-        let v = indexToSegV(idx);
-        [...poss].forEach((number)=>{
-            outs.add(`row:${r.idx}.num:${number}`,r.pos);
-            outs.add(`col:${c.idx}.num:${number}`,c.pos);
-            outs.add(`box:${b.idx}.num:${number}`,b.pos);
-            segs.set(`${h}.${number}`,true);
-            segs.set(`${v + 27}.${number}`,true);
-        })
-    }
+
     //console.log(outs.values);
     //console.log(segs);
     //function find seg skewers
+    const { outs, segs} = sortPossibles(pss);
 
-    const segDeletors = [];
-
-    for(let [key] of segs) {
-        let [ idx, num ] = key.split('.');
-        let third = +idx%3;
-        let neighbours = [0,1,2].filter(i=>i!==third).map(i=>(+idx)+(i-third));
-        let z = [ false, false ]
-        if(!segs.has(`${[neighbours[0]]}.${num}`) && !segs.has(`${[neighbours[1]]}.${num}`)) {   
-            z[0] = true;
-        }
-        let x = Math.floor((+idx%9)/3);
-        let neighboursBox = [0,1,2].filter(i=>i!==x).map(i=>(+idx)+(((i-x)*3)));
-        if(!segs.has(`${[neighboursBox[0]]}.${num}`) && !segs.has(`${[neighboursBox[1]]}.${num}`)) {
-            z[1] = true;
-        }
-        if(z[0] !== z[1]){ 
-            //console.log(key, third, neighbours, z[0]);
-            //console.log(key, x, neighboursBox, z[1]);
-            //console.log('skewered!');
-            if(!z[0]) { // check neighbours for deletes
-                let idx = neighbours.flatMap(i=> groupIndeces.segment(i).filter(idx=>pss.get(idx)?.has(+num)));
-                //console.log(idx);
-                segDeletors.push({ num: +num, idx, because: `neighbour linear skewer seg ${key}` });
-            }else{ // check neighboursbox for deletes
-                let idx = neighboursBox.flatMap(i=> groupIndeces.segment(i).filter(idx=>pss.get(idx)?.has(+num)));
-                //console.log(idx);
-                segDeletors.push({ num: +num, idx, because: `neighbour box skewer seg ${key}` });
-            }
-        }
-    }
-
-    
+    const segDeletors = getSegementDeletors(pss, segs);
 
     //function find group clusters
     //fold groups into row 0, clusters boxes (in lines)?
