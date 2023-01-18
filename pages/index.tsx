@@ -18,13 +18,17 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main className="m-auto">
         <div className={styles.description}>
           <h1 className="text-3xl font-bold underline">
             Sudoku!
           </h1>
         </div>
-        <div>{sudo.map((i:number)=><div>{i}</div>)}</div>
+        <div className="w-[400px] m-auto ">
+          <div className="container m-auto grid grid-cols-9">
+            {sudo.map((i:number)=><div>{i}</div>)}
+          </div>
+        </div>
       </main>
     </>
   )
