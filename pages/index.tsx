@@ -1,12 +1,30 @@
+import { useState } from 'react';
 import Head from 'next/head'
 // import Image from 'next/image'
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
-import { solver } from '../utils/sudokuSolver'
+import { initVals } from '../utils/sudokuSolver'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const grid: ReadonlyArray<undefined> = new Array(81).fill(undefined);
+
 export default function Home() {
+  const [ sudoState, setSudoState ] = useState(initVals);
+
+  const solveSquare = ((idx: number, number: number)=>{
+    const { solved, possibles, analysis } = sudoState;
+    solved.set(0, 1);
+    possibles.delete(0);
+    console.log(analysis);
+    setSudoState({
+      solved,
+      possibles,
+      analysis
+    });
+    return true;
+  })
+
   return (
     <>
       <Head>
@@ -18,20 +36,24 @@ export default function Home() {
       <main className="m-auto">
         <div className={styles.description}>
           <h1 className="text-3xl font-bold underline">
-            Sudoku!
+            Sudoku! {grid.length}
           </h1>
         </div>
         <div className="w-[400px] m-auto ">
           <div className="[&>*:nth-child(odd)]:bg-blue-500 container m-auto grid grid-cols-9">
-            {solver.sudo.map((el: { solved: number, possibles: Array<number> }, idx:number) => {
-              return <div key={idx}>
-                {el.solved > 0 && el.solved}{el.possibles.map((possible: number, idx: number) => (
-                  <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
-                  ))}
-                </div>
-            })}
+            {
+              grid.map((i:undefined, idx: number) => {
+                const solved = sudoState.solved.get(idx);
+                const possibles = sudoState.possibles.get(idx)?.size ? [...sudoState.possibles.get(idx)] : [];
+                return <div key={idx}>{solved && solved}{
+                  possibles.map((possible: number, idx: number) => (
+                    <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
+                  ))
+                }</div>
+              })}
           </div>
         </div>
+        <div onClick={()=>solveSquare(0,1)}>SET</div>
       </main>
     </>
   )

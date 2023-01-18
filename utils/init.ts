@@ -54,7 +54,7 @@ let rcbs = rcb(sudo);
 
 const VALIDNUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-const pss = new Map();
+const possibles = new Map();
 const solved = new Map<number, number>();
 for (let idx = 0; idx < 81; idx++) {
   if (sudo[idx] !== 0) {
@@ -66,7 +66,7 @@ for (let idx = 0; idx < 81; idx++) {
     ...(rcbs.get(`box.${indexToBox(idx).idx}`) || []),
   ]);
   if (all.size && sudo[idx] === 0) {
-    pss.set(
+    possibles.set(
       idx,
       new Set([...VALIDNUMBERS.filter((i) => ![...all].includes(i))])
     );
@@ -78,6 +78,6 @@ for (let idx = 0; idx < 81; idx++) {
 //console.log(pss, solved);
 
 export const info = {
-  pss,
+  possibles,
   solved
 }
