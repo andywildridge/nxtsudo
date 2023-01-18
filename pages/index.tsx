@@ -18,7 +18,7 @@ export default function Home() {
       <main className="m-auto">
         <div className={styles.description}>
           <h1 className="text-3xl font-bold underline">
-            Sudoku! <div>{solver.a.idx}</div>
+            Sudoku!
           </h1>
         </div>
         <div className="w-[400px] m-auto ">

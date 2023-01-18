@@ -1,7 +1,13 @@
-import * as transforms from "./indexTransforms";
-import { sudo } from "./init"
+//import * as transforms from "./indexTransforms";
+import { info } from "./init"
 
 export const solver = {
-  a: transforms.indexToRow(43),
-  sudo
+  info,
+  get sudo() {
+    const aggregate = [];
+    for(let i=0; i<81; i++) {
+      aggregate.push(info.solved.get(i) || 0);
+    }
+    return aggregate;
+  }
 }

@@ -14,7 +14,7 @@ const sudokuStr = `
                         091 645 000
 `;
 
-export const sudo = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
+const sudo = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
 
 class Collections {
   private data: Map<string, Set<number>>;
@@ -75,4 +75,9 @@ for (let idx = 0; idx < 81; idx++) {
 
 //initialise over
 // we have poss/pss & solved
-console.log(pss, solved);
+//console.log(pss, solved);
+
+export const info = {
+  pss,
+  solved
+}
