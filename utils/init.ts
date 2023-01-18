@@ -1,4 +1,7 @@
 import { indexToRow, indexToCol, indexToBox } from './indexTransforms'
+import { Collections } from './collections';
+
+const VALIDNUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const sudokuStr = `
                         000 000 200
@@ -16,25 +19,6 @@ const sudokuStr = `
 
 const sudo = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
 
-class Collections {
-  private data: Map<string, Set<number>>;
-  constructor() {
-    this.data = new Map();
-  }
-
-  get values() {
-    return this.data;
-  }
-
-  add = (key: string, value: number): void => {
-    // setter
-    if (!this.data.has(key)) {
-      this.data.set(key, new Set());
-    }
-    this.data.get(key)?.add(value);
-  };
-}
-
 const rcb = (sudo: Array<number>): Map<string, Set<number>> => {
   //create collection of already solved numbers in groups row,col,box
   return sudo.reduce(
@@ -51,8 +35,6 @@ const rcb = (sudo: Array<number>): Map<string, Set<number>> => {
 };
 
 let rcbs = rcb(sudo);
-
-const VALIDNUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const possibles = new Map();
 const solved = new Map<number, number>();
@@ -72,10 +54,6 @@ for (let idx = 0; idx < 81; idx++) {
     );
   }
 }
-
-//initialise over
-// we have poss/pss & solved
-//console.log(pss, solved);
 
 export const info = {
   possibles,
