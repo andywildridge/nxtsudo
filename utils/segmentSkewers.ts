@@ -1,6 +1,6 @@
 import { groupIndeces } from './indexTransforms'
 
-export const getSegementDeletors = (pss: ReadonlyMap<number, Set<number>>, segs: Map<string, Set<number>>) => {
+export const getSegementDeletors = (pss: ReadonlyMap<number, Set<number>>, segs: Map<string, boolean>) => {
 
     const segDeletors = [];
 

@@ -1,10 +1,10 @@
 import { indexToRow, indexToCol, indexToBox, indexToSegH, indexToSegV } from './indexTransforms'
 import { Collections } from './collections';
 
-export const sortPossibles = (pss: ReadonlyMap<number, Set<number>>) => {
+export const sortPossibles = (possibles: ReadonlyMap<number, Set<number>>) => {
     let groups = new Collections();
-    let segments = new Map();
-    for (let [idx, poss] of pss) {
+    let segments = new Map<string, boolean>();
+    for (let [idx, poss] of possibles) {
         let r = indexToRow(idx);
         let c = indexToCol(idx);
         let b = indexToBox(idx);

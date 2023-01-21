@@ -3,7 +3,7 @@
 import { sortPossibles } from './sortPossibles';
 import { getSegementDeletors } from './segmentSkewers';
 import { getGroupClusters } from './getGroupClusters';
-import { findSolvable } from './findSolvable';
+import { findSquareSolvable } from './findSolvable';
 
 export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     //pss.set(1, new Set([1]))
@@ -22,42 +22,23 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     //function find seg skewers
     const { groups, segments } = sortPossibles(possibles);
 
-    const segDeletors = getSegementDeletors(possibles, segments);
+    const solvable = findSquareSolvable(possibles);
 
-    const groupClusters = getGroupClusters(groups);
+    const segmentRemovers = getSegementDeletors(possibles, segments);
 
-    const solvable = findSolvable(possibles);
+    const clusterRemovers = getGroupClusters(possibles, groups);
 
-/*
+    /*clusterRemovers.singles.forEach(i=>{
+        solvable.push({
+            key: i.index,
+            item: new Set(i.canContainNumbers)
+        });
+    });*/
 
-    interface StringMap { [key: string]: any; }
-
-    //func canReject/omit = getBlocked(groups);
-    let deletors:StringMap = {};
-    let deletorsAll: Array<{ idx: number, nums: Array<number>, because: string}> = [];
-    // groups
-    groups.forEach(i=>{
-        if(i.numbers.size >= 1) {
-            console.log(i, i.canRemoveInner);
-            i.canRemoveInner && i.canRemoveInner.forEach((ii:StringMap)=>{
-                //if(deletors[i.idx]){ console.log('dupe', i, deletors[i.idx]) }
-                //deletors[i.idx] = i.vals;
-                if(i.type.indexOf('.num') === -1) {
-                    deletorsAll.push({ idx: ii.idx, nums: ii.vals, because: `because ${i.type} idx:${i.index} pos:${i.positions} num:${[...i.numbers]}`});
-                }
-            });
-        }
-    })
-    */
-
-    //console.log(pss);
-    //console.log(deletors);
     return {
         solvable,
-        //deletors,
-        //deletorsAll,
-        segDeletors
-        //removable/deletable
+        clusterRemovers,
+        segmentRemovers
     }
 
 }

@@ -1,12 +1,18 @@
 type clusterType = {
     type: string;
     index: number;
-    positions: Array<number>;
-    numbers: Set<number>;
+    positionCluster: Array<number>;
+    canContainNumbers: Set<number>;
     canRemoveInner?: any;
 }
 
-type C3params = {
+type groupType = {
+    positions: Set<number>;
+    type: string;
+    number: number;
+}
+
+type ClusterParams = {
     value: number;
     type: string;
     index: number;
@@ -34,11 +40,27 @@ export class Collections extends CollectionsG<Set<number>> {
     }
 }
 
+export class CollectionsGrouping extends CollectionsG<groupType> {
+    constructor() {
+        super();
+    }
+    add = (key: string, value: number):void => { // setter
+        if(!this.data.has(key)){
+            this.data.set(key, { 
+                type: 'type',
+                number: 1,
+                positions: new Set() 
+            });
+        }
+        this.data.get(key)?.positions.add(value);
+    }
+}
+
 export class CollectionsGroup extends CollectionsG<Map<string, clusterType>> {
     constructor() {
         super();
     }
-    add = (params: C3params):void => { // setter
+    add = (params: ClusterParams):void => { // setter
         const { value, type, index, positions } = params;
         const key = `${type}.${index}`;
         const key2 = positions.join();
@@ -47,10 +69,10 @@ export class CollectionsGroup extends CollectionsG<Map<string, clusterType>> {
         }
         if(!this.data.get(key)?.has(key2)){
             this.data.get(key)?.set(key2, { 
-                type, index, positions,
-                numbers: new Set()} 
+                type, index, positionCluster: positions,
+                canContainNumbers: new Set()} 
             );
         }
-        this.data.get(key)?.get(key2)?.numbers.add(value);
+        this.data.get(key)?.get(key2)?.canContainNumbers.add(value);
     }
 }
