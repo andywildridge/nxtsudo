@@ -1,3 +1,4 @@
+import { isObjectBindingPattern } from 'typescript';
 import { Collections, CollectionsGroup } from './collections';
 import { groupIndeces } from './indexTransforms'
  
@@ -7,7 +8,7 @@ export const getGroupClusters = (possibles:  ReadonlyMap<number, Set<number>>, g
     //fold groups into rows/cols, , number n, clusters
     // func clusters = getClusters(groupings)
     // reverses position and possibles
-    console.log(groupings);
+    //console.log(groupings);
     const clusters = new CollectionsGroup();
     for (let [key, positions] of groupings.values) {
         //type,index number/possible clusters
@@ -37,14 +38,27 @@ export const getGroupClusters = (possibles:  ReadonlyMap<number, Set<number>>, g
     for(let [_key, item] of clusters.values) { //item = possible clusterBlock
         for(let [_key, obj] of item) { //obj = 
             // only process groups not number groupss here where > 1
-            if(obj.type.indexOf('num')>-1) { continue; } // continue skips
+            if (
+              obj.type.indexOf("num") > -1 &&
+              obj.positionCluster.length === 1
+            ) {
+              continue;
+            } // skip single num as picked up elswheres
 
-            if((obj.positionCluster.length === obj.canContainNumbers.size) && obj.positionCluster.length === 1) {
-                singles.push(obj);
-            }
+            if(obj.positionCluster.length !== obj.canContainNumbers.size){ continue; }
+            
+            console.log(obj);
 
-            // does this group of positions include and equal size number of solution 
-            if(obj.positionCluster.length === obj.canContainNumbers.size) { 
+            if( obj.positionCluster.length === 1) {
+                singles.push({
+                  square: groupIndeces[obj.type](obj.index)[
+                    obj.positionCluster[0]
+                  ],
+                  type: obj.type,
+                  number: [...obj.canContainNumbers][0],
+                  because: `only place this number can go on this ${obj.type}`,
+                });
+            } else { 
                 let type = obj.type.split('.')[0];
                 let related = groupIndeces[type](obj.index).map((idx: number)=> ({ idx, vals: possibles.get(idx) })); 
                 let canRemoveInnerFind = related.filter((i: { idx:number, vals: Set<number> | undefined }, idx: number) =>{
@@ -67,11 +81,7 @@ export const getGroupClusters = (possibles:  ReadonlyMap<number, Set<number>>, g
                         }
                     }
                 });
-                if(obj.positionCluster.length>1){
-                    groups.push({ ...obj, related, canRemoveInner, canRemoveOuter });
-                }else{
-                    groups.push({ obj }); // single
-                }
+                groups.push({ ...obj, related, canRemoveInner, canRemoveOuter });
             }
         }
     }

@@ -4,7 +4,7 @@ export const findSquareSolvable = (pss: ReadonlyMap<number, Set<number>>) => {
     //square singles
     for(let [key, item] of pss) {
         if(item.size === 1){
-            setters.push({key, item});
+            setters.push({ square: key, number: [...item][0], because: 'only number that can go on this square'});
         }
     }
 

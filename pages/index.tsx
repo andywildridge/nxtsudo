@@ -14,16 +14,19 @@ const grid: ReadonlyArray<undefined> = new Array(81).fill(undefined);
 export default function Home() {
   const [ sudoState, setSudoState ] = useState(initVals);
 
-  const solveSquare = ((idx: number, number: number)=>{
-    const { initial, solved, possibles, analysis } = sudoState;
-    solved.set(0, 1);
-    possibles.delete(0);
+  const solveSquare = ((idx: number)=>{
+    const { initial, solved, possibles, analysis, singles } = sudoState;
+    if(!singles[idx]) { return false; }
+    console.log(singles[idx]);
+    solved.set(idx, singles[idx][0].number);
+    possibles.delete(idx);
     console.log(analysis);
     setSudoState({
       initial,
       solved,
       possibles,
-      analysis
+      analysis,
+      singles
     });
     return true;
   })
@@ -48,8 +51,8 @@ export default function Home() {
               grid.map((i:undefined, idx: number) => {
                 const solved = sudoState.solved.get(idx);
                 const possibles = [...(sudoState.possibles.get(idx) || [])];  // handle destrucure undefined 
-                const squareStyle = `${sudoState.initial.get(idx) ? 'font-bold' : ''} ${idx === 0 ?  'bg-red-500' : ''}`;
-                return <div className={squareStyle} key={idx}>{solved && solved}{
+                const squareStyle = `${sudoState.initial.get(idx) ? 'font-bold' : ''} ${sudoState.singles[idx] ?  'bg-red-100' : ''}`;
+                return <div className={squareStyle} key={idx} onClick={()=>solveSquare(idx)}>{solved && solved}{
                   possibles.map((possible: number, idx: number) => (
                     <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
                   ))
@@ -57,7 +60,6 @@ export default function Home() {
               })}
           </div>
         </div>
-        <div onClick={()=>solveSquare(0,1)}>SET</div>
       </main>
     </>
   )
