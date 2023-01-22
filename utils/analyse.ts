@@ -35,10 +35,31 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
         });
     });*/
 
+    interface StringMap {
+        [key: string]: any;
+    }
+
+    const singles: StringMap = {};
+
+    solvable.forEach((i: any)=>{
+        if(!singles[i.square]){
+        singles[i.square] = [];
+        }
+        singles[i.square].push(i);
+    });
+
+    clusterRemovers.singles.forEach((i: any) => {
+        if (!singles[i.square]) {
+        singles[i.square] = [];
+        }
+        singles[i.square].push(i);
+    });
+
+    console.log(singles);
+
     return {
-        solvable,
-        clusterRemovers,
-        segmentRemovers
+        solvable: singles,
+        removable: undefined
     }
 
 }
