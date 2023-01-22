@@ -69,9 +69,15 @@ export const getGroupClusters = (
         const oppositeType = type === 'row' ? 'col' : 'row';
         const canDelete = [];
         obj.positionCluster.forEach((opp)=>{
-            const related = groupIndeces[oppositeType](opp).filter((i,idx)=>!obj.canContainNumbers.has(idx) && 
-            [...(possibles.get(i) || [])].includes(obj.index));
-            console.log(related);
+            const canRemoveOuter = groupIndeces[oppositeType](opp).filter(
+              (i, idx) =>
+                !obj.canContainNumbers.has(idx) &&
+                [...(possibles.get(i) || [])].includes(obj.index)
+            );
+            console.log(canRemoveOuter);
+            if (canRemoveOuter.length) {
+              groups.push({ ...obj, canRemoveOuter, because: "xwing" });
+            }
         });
       }
 
