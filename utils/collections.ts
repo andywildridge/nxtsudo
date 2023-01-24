@@ -19,7 +19,7 @@ type ClusterParams = {
     positions: Array<number>;
 }
 
-class CollectionsG<MapValType> {
+abstract class CollectionsG<MapValType> {
     protected data: Map<string, MapValType>;
     constructor () {
         this.data = new Map();

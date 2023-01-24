@@ -55,7 +55,7 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
         singles[i.square].push(i);
     });
 
-    console.log(singles);
+    console.log(clusterRemovers.groups);
 
     return {
         solvable: singles,
