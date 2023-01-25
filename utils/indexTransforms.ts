@@ -56,19 +56,32 @@ const segmentIndeces = (idx: number): Array<number> => {
     step = 1;
   } else {
     idx = idx - 27;
-    start = Math.floor(idx / 3) + (idx % 3) * 27;
+    start = Math.floor(idx / 3) + (idx % 3) * 27 + 27;
     step = 9;
   }
   return [0, 1, 2].map((i) => start + i * step);
 };
 
-interface IndexTransform {
-  [key: string]: (idx: number) => Array<number>;
+enum GroupType {
+  row = "row",
+  col = "col",
+  box = "box",
+  segment = "segment",
 }
 
-export const groupIndeces: IndexTransform = {
+export const groupIndeces: Record<GroupType, (idx: number) => Array<number>> = {
   row: rowIndeces,
   col: colIndeces,
   box: boxIndeces,
   segment: segmentIndeces,
+};
+
+export const getRelatedSquares = (idx: number): number[] => {
+  return [
+    ...new Set([
+      ...groupIndeces["row"](indexToRow(idx).idx),
+      ...groupIndeces["col"](indexToCol(idx).idx),
+      ...groupIndeces["box"](indexToBox(idx).idx),
+    ]),
+  ];
 };

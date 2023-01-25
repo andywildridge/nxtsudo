@@ -1,46 +1,61 @@
-import { useState } from 'react';
-import Head from 'next/head'
+import { useState } from "react";
+import Head from "next/head";
 // import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
-import { initVals } from '../utils/sudokuSolver'
-import { indexToRow, indexToCol, indexToBox, groupIndeces } from '../utils/indexTransforms'
+import { Inter } from "@next/font/google";
+import styles from "@/styles/Home.module.css";
+import { initVals } from "../utils/sudokuSolver";
+import { getRelatedSquares } from "../utils/indexTransforms";
 import { analyse } from "../utils/analyse";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 const grid: ReadonlyArray<undefined> = new Array(81).fill(undefined);
 
-let removePoss = (idx: number, nums: Array<number>, possibles: Map<number, Set<number>>) => {
-  nums.forEach(n=>{
+let removePoss = (
+  // side effect
+  idx: number,
+  nums: Array<number>,
+  possibles: Map<number, Set<number>>
+) => {
+  nums.forEach((n) => {
     possibles.get(idx)?.delete(n);
-  })
-}
+  });
+};
+
+let gridStyle = [
+  "[&>*:nth-child(odd)]:border-dashed",
+  "[&>*:nth-child(odd)]:border-2",
+  "[&>*:nth-child(odd)]:border-indigo-600",
+  "bcontainer m-auto grid grid-cols-9",
+].join(" ");
 
 export default function Home() {
-  const [ sudoState, setSudoState ] = useState(initVals);
+  const [sudoState, setSudoState] = useState(initVals);
 
-  const solveSquare = ((idx: number)=>{
-    const { initialClues, solved, possibles, solvable, removable } = sudoState;
-    if(!solvable[idx]) { return false; }
+  const solveSquare = (idx: number) => {
+    // custom hook?
+    const { solved, possibles, solvable, removable } = sudoState;
+    if (!solvable[idx]) {
+      return false;
+    }
     const num = solvable[idx][0].number;
     solved.set(idx, num);
     possibles.delete(idx);
-    groupIndeces['row'](indexToRow(idx).idx).forEach((i: number)=>removePoss(i,[num],possibles));
-    groupIndeces['col'](indexToCol(idx).idx).forEach((i: number)=>removePoss(i,[num],possibles));
-    groupIndeces['box'](indexToBox(idx).idx).forEach((i: number)=>removePoss(i,[num],possibles));
+
+    const related = getRelatedSquares(idx);
+    related.forEach((i: number) => removePoss(i, [num], possibles));
+
     const newanalysis = analyse(possibles);
 
-    console.log('new',newanalysis);
     setSudoState({
       ...sudoState,
       possibles,
       solved,
       solvable: newanalysis.solvable,
-      removable: newanalysis.removable
+      removable: newanalysis.removable,
     });
     return true;
-  })
+  };
 
   return (
     <>
@@ -57,21 +72,34 @@ export default function Home() {
           </h1>
         </div>
         <div className="w-[400px] m-auto ">
-          <div className="[&>*:nth-child(odd)]:border-dashed [&>*:nth-child(odd)]:border-2 [&>*:nth-child(odd)]:border-indigo-600 bcontainer m-auto grid grid-cols-9">
-            {
-              grid.map((i:undefined, idx: number) => {
-                const solved = sudoState.solved.get(idx);
-                const possibles = [...(sudoState.possibles.get(idx) || [])];  // handle destrucure undefined 
-                const squareStyle = `${sudoState.initialClues?.includes(idx) ? 'font-bold' : ''} ${sudoState.solvable[idx] ?  'bg-red-100' : ''}`;
-                return <div className={squareStyle} key={idx} onClick={()=>solveSquare(idx)}>{solved && solved}{
-                  possibles.map((possible: number, idx: number) => (
-                    <div className="text-xs inline-block text-red-600" key={idx}>{possible}</div>
-                  ))
-                }</div>
-              })}
+          <div className={gridStyle}>
+            {grid.map((i: undefined, idx: number) => {
+              const solved = sudoState.solved.get(idx);
+              const squarePossibles = [...(sudoState.possibles.get(idx) || [])];
+              const squareStyle = `${
+                sudoState.initialClues?.includes(idx) ? "font-bold" : ""
+              } ${sudoState.solvable[idx] ? "bg-red-100" : ""}`;
+              return (
+                <div
+                  className={squareStyle}
+                  key={idx}
+                  onClick={() => solveSquare(idx)}
+                >
+                  {solved && solved}
+                  {squarePossibles.map((possible: number, idx: number) => (
+                    <div
+                      className="text-xs inline-block text-red-600"
+                      key={idx}
+                    >
+                      {possible}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
     </>
-  )
+  );
 }

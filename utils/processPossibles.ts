@@ -15,7 +15,7 @@ export const processPossibles = (possibles: ReadonlyMap<number, Set<number>>) =>
             groups.add(`col:${c.idx}.num:${number}`,c.pos);
             groups.add(`box:${b.idx}.num:${number}`,b.pos);
             segments.set(`${h}.${number}`,true);
-            segments.set(`${v + 27}.${number}`,true);
+            segments.set(`${v}.${number}`,true);
         })
     }
     return {
