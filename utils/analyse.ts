@@ -1,11 +1,11 @@
-import { sortPossibles } from './sortPossibles';
+import { processPossibles } from './processPossibles';
 import { getSegementDeletors } from './segmentSkewers';
 import { getGroupClusters } from './getGroupClusters';
 import { findSquareSolvable } from './findSolvable';
 
 export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
 
-    const { groups, segments } = sortPossibles(possibles);
+    const { groups, segments } = processPossibles(possibles);
     const solvable = findSquareSolvable(possibles);
     const segmentRemovers = getSegementDeletors(possibles, segments);
     const clusterRemovers = getGroupClusters(possibles, groups);
