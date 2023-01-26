@@ -6,10 +6,12 @@ import styles from "@/styles/Home.module.css";
 import { initVals } from "../utils/sudokuSolver";
 import { getRelatedSquares } from "../utils/indexTransforms";
 import { analyse } from "../utils/analyse";
+import { gridStyle } from "@/styles/styles";
+import Grid from "../components/Grid";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const grid: ReadonlyArray<undefined> = new Array(81).fill(undefined);
+const grid: ReadonlyArray<null> = new Array(81).fill(null);
 
 let removePoss = (
   // side effect
@@ -22,12 +24,9 @@ let removePoss = (
   });
 };
 
-let gridStyle = [
-  "[&>*:nth-child(odd)]:border-dashed",
-  "[&>*:nth-child(odd)]:border-2",
-  "[&>*:nth-child(odd)]:border-indigo-600",
-  "bcontainer m-auto grid grid-cols-9",
-].join(" ");
+function Square(props: { idx: number }) {
+  return <div>P:{props.idx}</div>;
+}
 
 export default function Home() {
   const [sudoState, setSudoState] = useState(initVals);
@@ -38,7 +37,7 @@ export default function Home() {
     if (!solvable[idx]) {
       return false;
     }
-    const num = solvable[idx][0].number;
+    const num = solvable[idx].number;
     solved.set(idx, num);
     possibles.delete(idx);
 
@@ -65,15 +64,14 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Grid grid={[...grid]} />
       <main className="m-auto">
         <div className={styles.description}>
-          <h1 className="text-3xl font-bold underline">
-            Sudoku! {grid.length}
-          </h1>
+          <h1 className="text-3xl font-bold underline">Sudoku!</h1>
         </div>
         <div className="w-[400px] m-auto ">
           <div className={gridStyle}>
-            {grid.map((i: undefined, idx: number) => {
+            {grid.map((_: null, idx: number) => {
               const solved = sudoState.solved.get(idx);
               const squarePossibles = [...(sudoState.possibles.get(idx) || [])];
               const squareStyle = `${
@@ -85,7 +83,8 @@ export default function Home() {
                   key={idx}
                   onClick={() => solveSquare(idx)}
                 >
-                  {solved && solved}
+                  <Square idx={idx} />
+                  {solved ?? null}
                   {squarePossibles.map((possible: number, idx: number) => (
                     <div
                       className="text-xs inline-block text-red-600"

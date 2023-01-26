@@ -1,44 +1,34 @@
-import { processPossibles } from './processPossibles';
-import { getSegementDeletors } from './segmentSkewers';
-import { getGroupClusters } from './getGroupClusters';
-import { findSquareSolvable } from './findSolvable';
+import { processPossibles } from "./processPossibles";
+import { getSegementDeletors } from "./segmentSkewers";
+import { getGroupClusters } from "./getGroupClusters";
+import { findSquareSolvable } from "./findSolvable";
 
 export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
+  const { groups, segments } = processPossibles(possibles);
+  const solvableSquare = findSquareSolvable(possibles);
+  const segmentRemovers = getSegementDeletors(possibles, segments);
+  const clusterRemovers = getGroupClusters(possibles, groups);
 
-    const { groups, segments } = processPossibles(possibles);
-    const solvable = findSquareSolvable(possibles);
-    const segmentRemovers = getSegementDeletors(possibles, segments);
-    const clusterRemovers = getGroupClusters(possibles, groups);
+  interface solvableSquare {
+    square: number;
+    number: number;
+    because: string;
+  }
 
-    interface Single {
-        square: number;
-        number: number;
-        because: string;        
-    }
+  const solvable: Record<number, solvableSquare> = {};
 
-    const singles:Record<number, Single[]> = {};
+  //group solvable
+  clusterRemovers.singles.forEach((i: solvableSquare) => {
+    solvable[i.square] = i;
+  });
 
-    //square singles
-    solvable.forEach((i: Single)=>{
-        if(!singles[i.square]){
-        singles[i.square] = [];
-        }
-        singles[i.square].push(i);
-    });
+  //square solvable
+  solvableSquare.forEach((i: solvableSquare) => {
+    solvable[i.square] = i;
+  });
 
-    //group singles
-    clusterRemovers.singles.forEach((i: Single) => {
-        if (!singles[i.square]) {
-        singles[i.square] = [];
-        }
-        singles[i.square].push(i);
-    });
-
-    console.log(clusterRemovers);
-
-    return {
-        solvable: singles,
-        removable: clusterRemovers
-    }
-
-}
+  return {
+    solvable,
+    removable: clusterRemovers,
+  };
+};
