@@ -24,10 +24,6 @@ let removePoss = (
   });
 };
 
-function Square(props: { idx: number }) {
-  return <div>P:{props.idx}</div>;
-}
-
 export default function Home() {
   const [sudoState, setSudoState] = useState(initVals);
 
@@ -83,7 +79,6 @@ export default function Home() {
                   key={idx}
                   onClick={() => solveSquare(idx)}
                 >
-                  <Square idx={idx} />
                   {solved ?? null}
                   {squarePossibles.map((possible: number, idx: number) => (
                     <div

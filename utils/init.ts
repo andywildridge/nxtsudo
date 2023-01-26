@@ -1,9 +1,9 @@
-import { indexToRow, indexToCol, indexToBox } from './indexTransforms'
-import { Collections } from './collections';
+import { indexToRow, indexToCol, indexToBox } from "./indexTransforms";
+import { Collections } from "./collections";
 
-const VALIDNUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const VALIDNUMBERS: ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-const sudokuStr = `
+const sudokuStr: string = `
                         000 000 200
                         000 050 009
                         002 709 003
@@ -17,9 +17,11 @@ const sudokuStr = `
                         091 645 000
 `;
 
-const sudo = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
+const sudo: number[] = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
 
-const rcb = (sudo: Array<number>): Map<string, Set<number>> => {
+const getRowColBoxSolved: (sudo: Array<number>) => Map<string, Set<number>> = (
+  sudo: Array<number>
+): Map<string, Set<number>> => {
   //create collection of already solved numbers in groups row,col,box
   return sudo.reduce(
     (result: Collections, val: number, idx: number): Collections => {
@@ -34,29 +36,33 @@ const rcb = (sudo: Array<number>): Map<string, Set<number>> => {
   ).values;
 };
 
-let rcbs = rcb(sudo);
+let rowColBoxSolved: Map<string, Set<number>> = getRowColBoxSolved(sudo);
 
-const possibles = new Map();
+const possibles = new Map<number, Set<number>>();
 const solved = new Map<number, number>();
 
 for (let idx = 0; idx < 81; idx++) {
+  // if square already had value set solved
   if (sudo[idx] !== 0) {
     solved.set(idx, sudo[idx]);
-  }
-  let all = new Set([
-    ...(rcbs.get(`row.${indexToRow(idx).idx}`) || []),
-    ...(rcbs.get(`col.${indexToCol(idx).idx}`) || []),
-    ...(rcbs.get(`box.${indexToBox(idx).idx}`) || []),
-  ]);
-  if (all.size && sudo[idx] === 0) {
+  } else {
+    // get set of all solved for square and invert to get possibles
+    const allSolvedRelativeToSquare = new Set([
+      ...(rowColBoxSolved.get(`row.${indexToRow(idx).idx}`) || []),
+      ...(rowColBoxSolved.get(`col.${indexToCol(idx).idx}`) || []),
+      ...(rowColBoxSolved.get(`box.${indexToBox(idx).idx}`) || []),
+    ]);
+
     possibles.set(
       idx,
-      new Set([...VALIDNUMBERS.filter((i) => ![...all].includes(i))])
+      new Set([
+        ...VALIDNUMBERS.filter((i) => !allSolvedRelativeToSquare.has(i)),
+      ])
     );
   }
 }
 
 export const info = {
   solved,
-  possibles
-}
+  possibles,
+};

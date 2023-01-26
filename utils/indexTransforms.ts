@@ -62,7 +62,7 @@ const segmentIndeces = (idx: number): Array<number> => {
   return [0, 1, 2].map((i) => start + i * step);
 };
 
-enum GroupType {
+export enum GroupType {
   row = "row",
   col = "col",
   box = "box",

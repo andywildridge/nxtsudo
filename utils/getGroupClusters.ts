@@ -1,7 +1,5 @@
-import { isObjectBindingPattern } from "typescript";
-import { isBooleanObject } from "util/types";
 import { Collections, CollectionsGroup } from "./collections";
-import { groupIndeces } from "./indexTransforms";
+import { groupIndeces, GroupType } from "./indexTransforms";
 
 export const getGroupClusters = (
   possibles: ReadonlyMap<number, Set<number>>,
@@ -55,7 +53,9 @@ export const getGroupClusters = (
 
       if (obj.positionCluster.length === 1) {
         singles.push({
-          square: groupIndeces[obj.type](obj.index)[obj.positionCluster[0]],
+          square: groupIndeces[obj.type as GroupType](obj.index)[
+            obj.positionCluster[0]
+          ],
           type: obj.type,
           number: [...obj.canContainNumbers][0],
           because: `only place this number can go on this ${obj.type}`,
@@ -65,28 +65,32 @@ export const getGroupClusters = (
       if (obj.positionCluster.length > 1 && obj.type.indexOf("num") > -1) {
         console.log(obj);
         const type = obj.type.split(".")[0];
-        if(type === 'box') { continue; }
-        const oppositeType = type === 'row' ? 'col' : 'row';
+        if (type === "box") {
+          continue;
+        }
+        const oppositeType = type === "row" ? "col" : "row";
         const canDelete = [];
-        obj.positionCluster.forEach((opp)=>{
-            const canRemoveOuter = groupIndeces[oppositeType](opp).filter(
-              (i, idx) =>
-                !obj.canContainNumbers.has(idx) &&
-                [...(possibles.get(i) || [])].includes(obj.index)
-            );
-            console.log(canRemoveOuter);
-            if (canRemoveOuter.length) {
-              groups.push({ ...obj, canRemoveOuter, because: "xwing" });
-            }
+        obj.positionCluster.forEach((opp) => {
+          const canRemoveOuter = groupIndeces[oppositeType](opp).filter(
+            (i, idx) =>
+              !obj.canContainNumbers.has(idx) &&
+              [...(possibles.get(i) || [])].includes(obj.index)
+          );
+          console.log(canRemoveOuter);
+          if (canRemoveOuter.length) {
+            groups.push({ ...obj, canRemoveOuter, because: "xwing" });
+          }
         });
       }
 
       if (obj.positionCluster.length > 1 && obj.type.indexOf("num") === -1) {
         let type = obj.type.split(".")[0];
-        let related = groupIndeces[type](obj.index).map((idx: number) => ({
-          idx,
-          vals: possibles.get(idx),
-        }));
+        let related = groupIndeces[type as GroupType](obj.index).map(
+          (idx: number) => ({
+            idx,
+            vals: possibles.get(idx),
+          })
+        );
         let canRemoveInnerFind = related.filter(
           (i: { idx: number; vals: Set<number> | undefined }, idx: number) => {
             if (i.vals && obj.positionCluster.includes(idx)) {
