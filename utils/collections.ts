@@ -95,13 +95,13 @@ export class CollectionsGroup extends CollectionsBase<
   add = (params: ClusterParams): void => {
     // setter
     const { value, type, isNumberCluster, index, positions } = params;
-    const key = `${type}.${index}`;
-    const key2 = positions.join();
-    if (!this.data.has(key)) {
-      this.data.set(key, new Map());
+    const keyType = `${type}.${index}`;
+    const keyPositions = positions.join();
+    if (!this.data.has(keyType)) {
+      this.data.set(keyType, new Map());
     }
-    if (!this.data.get(key)?.has(key2)) {
-      this.data.get(key)?.set(key2, {
+    if (!this.data.get(keyType)?.has(keyPositions)) {
+      this.data.get(keyType)?.set(keyPositions, {
         type,
         index,
         isNumberCluster,
@@ -109,6 +109,6 @@ export class CollectionsGroup extends CollectionsBase<
         canContainNumbers: new Set(),
       });
     }
-    this.data.get(key)?.get(key2)?.canContainNumbers.add(value);
+    this.data.get(keyType)?.get(keyPositions)?.canContainNumbers.add(value);
   };
 }

@@ -22,7 +22,6 @@ export const processPossibles = (
       groups.add({ type: "row", index: row.idx, number }, row.pos);
       groups.add({ type: "col", index: col.idx, number }, col.pos);
       groups.add({ type: "box", index: box.idx, number }, box.pos);
-      console.log(idx, h, v + 27);
       segments.set(`${h}.${number}`, true);
       segments.set(`${v + 27}.${number}`, true);
     });

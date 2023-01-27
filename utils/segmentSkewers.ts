@@ -5,7 +5,6 @@ export const getSegementDeletors = (
   segments: Map<string, boolean>
 ) => {
   const segDeletors = [];
-  console.log(segments);
 
   for (let [key] of segments) {
     let [idx, num] = key.split(".");
