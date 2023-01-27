@@ -15,6 +15,9 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
   const segmentRemovers = getSegementDeletors(possibles, segments);
   const clusterRemovers = getGroupClusters(possibles, groups);
 
+  console.log("groups", groups);
+  console.log("segments", segments);
+
   const solvable: Record<number, solvableSquare> = {};
 
   //group solvable

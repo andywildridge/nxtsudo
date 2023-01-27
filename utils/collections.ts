@@ -47,6 +47,41 @@ export class Collections extends CollectionsBase<string, Set<number>> {
   };
 }
 
+enum GroupType {
+  row = "row",
+  col = "col",
+  box = "box",
+  segment = "segment",
+}
+
+interface GroupByBumber {
+  possibles: Set<number>;
+  type: GroupType;
+  index: number;
+  number: number;
+}
+export class CollectionGroupByNumber extends CollectionsBase<
+  string,
+  GroupByBumber
+> {
+  constructor() {
+    super();
+  }
+  add = ({ type, index, number }: GroupByBumber, position: number): void => {
+    // setter
+    const key = `${type}.${type}:${number}`;
+    if (!this.data.has(key)) {
+      this.data.set(key, {
+        type,
+        index,
+        number,
+        possibles: new Set(),
+      });
+    }
+    this.data.get(key)?.possibles.add(position);
+  };
+}
+
 export class CollectionsGrouping extends CollectionsBase<string, groupType> {
   constructor() {
     super();

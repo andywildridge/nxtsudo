@@ -17,6 +17,8 @@ const sudokuStr: string = `
                         091 645 000
 `;
 
+console.log("STARTING");
+
 const sudo: number[] = [...sudokuStr.replace(/\s/g, "")].map((i) => ~~i);
 
 const getRowColBoxSolved: (sudo: Array<number>) => Map<string, Set<number>> = (
