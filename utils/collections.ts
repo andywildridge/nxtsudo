@@ -2,6 +2,7 @@
 type clusterType = {
   type: string;
   index: number;
+  isNumberCluster: boolean;
   positionCluster: Array<number>;
   canContainNumbers: Set<number>;
   canRemoveInner?: any;
@@ -16,6 +17,7 @@ type groupType = {
 type ClusterParams = {
   value: number;
   type: string;
+  isNumberCluster: boolean;
   index: number;
   positions: Array<number>;
 };
@@ -34,7 +36,7 @@ class CollectionsBase<KeyType, CollectionType> {
 }
 
 //Generic collection type (combination string keys)
-export class Collections extends CollectionsBase<string, Set<number>> {
+export class CollectionNumberSet extends CollectionsBase<string, Set<number>> {
   constructor() {
     super();
   }
@@ -47,29 +49,30 @@ export class Collections extends CollectionsBase<string, Set<number>> {
   };
 }
 
-enum GroupType {
-  row = "row",
-  col = "col",
-  box = "box",
-  segment = "segment",
-}
+type GroupType = "row" | "col" | "box" | "segment";
 
-interface GroupByBumber {
-  possibles: Set<number>;
+interface CollectionTypeIndexNumberInputs {
   type: GroupType;
   index: number;
   number: number;
 }
-export class CollectionGroupByNumber extends CollectionsBase<
+interface CollectionTypeIndexNumberProperties
+  extends CollectionTypeIndexNumberInputs {
+  possibles: Set<number>;
+}
+export class CollectionTypeIndexNumber extends CollectionsBase<
   string,
-  GroupByBumber
+  CollectionTypeIndexNumberProperties
 > {
   constructor() {
     super();
   }
-  add = ({ type, index, number }: GroupByBumber, position: number): void => {
+  add = (
+    { type, index, number }: CollectionTypeIndexNumberInputs,
+    position: number
+  ): void => {
     // setter
-    const key = `${type}.${type}:${number}`;
+    const key = `${type}.${index}:${number}`;
     if (!this.data.has(key)) {
       this.data.set(key, {
         type,
@@ -82,23 +85,6 @@ export class CollectionGroupByNumber extends CollectionsBase<
   };
 }
 
-export class CollectionsGrouping extends CollectionsBase<string, groupType> {
-  constructor() {
-    super();
-  }
-  add = (key: string, value: number): void => {
-    // setter
-    if (!this.data.has(key)) {
-      this.data.set(key, {
-        type: "type",
-        number: 1,
-        positions: new Set(),
-      });
-    }
-    this.data.get(key)?.positions.add(value);
-  };
-}
-
 export class CollectionsGroup extends CollectionsBase<
   string,
   Map<string, clusterType>
@@ -108,7 +94,7 @@ export class CollectionsGroup extends CollectionsBase<
   }
   add = (params: ClusterParams): void => {
     // setter
-    const { value, type, index, positions } = params;
+    const { value, type, isNumberCluster, index, positions } = params;
     const key = `${type}.${index}`;
     const key2 = positions.join();
     if (!this.data.has(key)) {
@@ -118,6 +104,7 @@ export class CollectionsGroup extends CollectionsBase<
       this.data.get(key)?.set(key2, {
         type,
         index,
+        isNumberCluster,
         positionCluster: positions,
         canContainNumbers: new Set(),
       });

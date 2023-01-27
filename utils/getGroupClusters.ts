@@ -1,9 +1,9 @@
-import { Collections, CollectionsGroup } from "./collections";
+import { CollectionTypeIndexNumber, CollectionsGroup } from "./collections";
 import { groupIndeces, GroupType } from "./indexTransforms";
 
 export const getGroupClusters = (
   possibles: ReadonlyMap<number, Set<number>>,
-  groupings: Collections
+  groupings: CollectionTypeIndexNumber
 ) => {
   //function find group clusters
   //fold groups into row 0, clusters boxes (in lines)?
@@ -12,21 +12,24 @@ export const getGroupClusters = (
   // reverses position and possibles
   //console.log(groupings);
   const clusters = new CollectionsGroup();
-  for (let [key, positions] of groupings.values) {
+  for (let [key, group] of groupings.values) {
     //type,index number/possible clusters
+    console.log("group", group);
     clusters.add({
-      value: ~~key.split(".")[1].split(":")[1],
-      type: key.split(".")[0].split(":")[0],
-      index: ~~key.split(".")[0].split(":")[1],
-      positions: [...positions],
+      value: group.number,
+      type: group.type,
+      isNumberCluster: false,
+      index: group.index,
+      positions: [...group.possibles],
     });
 
     //type,number index/possible clusters
     clusters.add({
-      value: ~~key.split(".")[0].split(":")[1],
-      type: `${key.split(".")[0].split(":")[0]}.num`,
-      index: ~~key.split(".")[1].split(":")[1],
-      positions: [...positions],
+      value: group.index,
+      type: group.type,
+      isNumberCluster: true,
+      index: group.number,
+      positions: [...group.possibles],
     });
   }
   // clusters now a map of uniquie possible sets as keys and position distribution as values;
@@ -43,7 +46,7 @@ export const getGroupClusters = (
     for (let [_key, obj] of item) {
       //obj =
       // only process groups not number groupss here where > 1
-      if (obj.type.indexOf("num") > -1 && obj.positionCluster.length === 1) {
+      if (obj.isNumberCluster && obj.positionCluster.length === 1) {
         continue;
       } // skip single num as picked up elswheres
 
@@ -62,13 +65,12 @@ export const getGroupClusters = (
         });
       }
 
-      if (obj.positionCluster.length > 1 && obj.type.indexOf("num") > -1) {
-        console.log(obj);
-        const type = obj.type.split(".")[0];
-        if (type === "box") {
+      //xwing
+      if (obj.positionCluster.length > 1 && obj.isNumberCluster) {
+        if (obj.type === "box") {
           continue;
         }
-        const oppositeType = type === "row" ? "col" : "row";
+        const oppositeType = obj.type === "row" ? "col" : "row";
         const canDelete = [];
         obj.positionCluster.forEach((opp) => {
           const canRemoveOuter = groupIndeces[oppositeType](opp).filter(
@@ -76,16 +78,16 @@ export const getGroupClusters = (
               !obj.canContainNumbers.has(idx) &&
               [...(possibles.get(i) || [])].includes(obj.index)
           );
-          console.log(canRemoveOuter);
+          //console.log(canRemoveOuter);
           if (canRemoveOuter.length) {
             groups.push({ ...obj, canRemoveOuter, because: "xwing" });
           }
         });
       }
 
-      if (obj.positionCluster.length > 1 && obj.type.indexOf("num") === -1) {
-        let type = obj.type.split(".")[0];
-        let related = groupIndeces[type as GroupType](obj.index).map(
+      //grouping
+      if (obj.positionCluster.length > 1 && !obj.isNumberCluster) {
+        let related = groupIndeces[obj.type as GroupType](obj.index).map(
           (idx: number) => ({
             idx,
             vals: possibles.get(idx),
@@ -123,32 +125,19 @@ export const getGroupClusters = (
             }
           }
         );
-        groups.push({ ...obj, related, canRemoveInner, canRemoveOuter });
+        groups.push({
+          ...obj,
+          related,
+          canRemoveInner,
+          canRemoveOuter,
+          because: `group ${obj.type} ${obj.index} ${obj?.canContainNumbers}`,
+        });
       }
     }
   }
 
-  //func canReject/omit = getBlocked(groups);
-  let deletors: StringMap = {};
-  let deletorsAll: Array<{
-    idx: number;
-    nums: Array<number>;
-    because: string;
-  }> = [];
-  // groups
-  /*clusters.values.forEach(i=>{
-        if(i.numbers.size >= 1) {
-            console.log(i, i.canRemoveInner);
-            i.canRemoveInner && i.canRemoveInner.forEach((ii:StringMap)=>{
-                //if(deletors[i.idx]){ console.log('dupe', i, deletors[i.idx]) }
-                //deletors[i.idx] = i.vals;
-                if(i.type.indexOf('.num') === -1) {
-                    deletorsAll.push({ idx: ii.idx, nums: ii.vals, because: `because ${i.type} idx:${i.index} pos:${i.positions} num:${[...i.numbers]}`});
-                }
-            });
-        }
-    });*/
-  //console.log(clusters.values);
+  console.log("clusters", clusters);
+
   return {
     groups,
     singles,

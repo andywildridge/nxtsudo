@@ -56,7 +56,7 @@ const segmentIndeces = (idx: number): Array<number> => {
     step = 1;
   } else {
     idx = idx - 27;
-    start = Math.floor(idx / 3) + (idx % 3) * 27 + 27;
+    start = Math.floor(idx / 3) + (idx % 3) * 27;
     step = 9;
   }
   return [0, 1, 2].map((i) => start + i * step);
