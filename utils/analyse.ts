@@ -22,9 +22,9 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
   const solvable: Record<number, solvableSquare> = {};
 
   //group solvable
-  clusterRemovers.singles.forEach((i: solvableSquare) => {
+  /*clusterRemovers.singles.forEach((i: solvableSquare) => {
     solvable[i.square] = i;
-  });
+  });*/
 
   //square solvable
   solvableSquare.forEach((i: solvableSquare) => {
@@ -39,16 +39,13 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     });
   });
 
-  clusterRemovers.groups.forEach((i) => {
-    i.canRemoveInner?.forEach((j) => {
+  /*clusterRemovers.groups.forEach((i) => {
+    i.canRemoveOuter?.forEach((j) => {
       j.vals.forEach((k) => {
         removable.push({ idx: j.idx, num: k, because: i.because });
       });
     });
-    /*i.canRemoveOuter?.forEach((j) => {
-          removable.push({ idx: j, num: k, because: i.because });
-      });*/
-  });
+  });*/
 
   console.log("removable", removable);
 

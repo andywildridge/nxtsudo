@@ -2,7 +2,6 @@
 type clusterType = {
   type: string;
   index: number;
-  isNumberCluster: boolean;
   positionCluster: Array<number>;
   canContainNumbers: Set<number>;
   canRemoveInner?: any;
@@ -17,7 +16,6 @@ type groupType = {
 type ClusterParams = {
   value: number;
   type: string;
-  isNumberCluster: boolean;
   index: number;
   positions: Array<number>;
 };
@@ -94,7 +92,7 @@ export class CollectionsGroup extends CollectionsBase<
   }
   add = (params: ClusterParams): void => {
     // setter
-    const { value, type, isNumberCluster, index, positions } = params;
+    const { value, type, index, positions } = params;
     const keyType = `${type}.${index}`;
     const keyPositions = positions.join();
     if (!this.data.has(keyType)) {
@@ -104,7 +102,6 @@ export class CollectionsGroup extends CollectionsBase<
       this.data.get(keyType)?.set(keyPositions, {
         type,
         index,
-        isNumberCluster,
         positionCluster: positions,
         canContainNumbers: new Set(),
       });
