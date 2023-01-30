@@ -10,24 +10,26 @@ export interface solvableSquare {
 }
 
 export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
+  //>>possibles [Number,Set]
+  //groups
   const { groups, segments } = processPossibles(possibles);
   const solvableSquare = findSquareSolvable(possibles);
   const segmentRemovers = getSegementDeletors(possibles, segments);
-  const clusterRemovers = getGroupClusters(possibles, groups);
+  const { groupRemovers, solvedSingles } = getGroupClusters(possibles, groups);
 
-  console.log("segments", segments);
+  console.log("////////////////////");
+  console.log("solvable squares", solvableSquare);
   console.log("segmentRemovers", segmentRemovers);
-  console.log("clusterRemovers", clusterRemovers.groups);
+  console.log("GRP", groupRemovers);
+  console.log("solvedSingles from groups", solvedSingles);
+  const singles = [...solvableSquare, ...solvedSingles];
+
+  console.log("all solved", singles);
 
   const solvable: Record<number, solvableSquare> = {};
 
-  //group solvable
-  /*clusterRemovers.singles.forEach((i: solvableSquare) => {
-    solvable[i.square] = i;
-  });*/
-
   //square solvable
-  solvableSquare.forEach((i: solvableSquare) => {
+  singles.forEach((i: solvableSquare) => {
     solvable[i.square] = i;
   });
 
@@ -39,6 +41,11 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     });
   });
 
+  const remByIdx = removable.reduce((acc: Record<number, boolean>, i) => {
+    acc[i.idx] = true;
+    return acc;
+  }, {});
+
   /*clusterRemovers.groups.forEach((i) => {
     i.canRemoveOuter?.forEach((j) => {
       j.vals.forEach((k) => {
@@ -47,10 +54,12 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     });
   });*/
 
+  console.log("solvable", solvable);
   console.log("removable", removable);
 
   return {
     solvable,
     removable, //clusterRemovers,
+    remByIdx,
   };
 };

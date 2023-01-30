@@ -7,6 +7,13 @@ type clusterType = {
   canRemoveInner?: any;
 };
 
+type ClusterType = {
+  type: string;
+  index: number;
+  positions: Array<number>;
+  contains: Set<number>;
+};
+
 type groupType = {
   positions: Set<number>;
   type: string;
@@ -19,6 +26,15 @@ type ClusterParams = {
   index: number;
   positions: Array<number>;
 };
+
+type ClusterParams2 = {
+  type: string;
+  index: number;
+  positions: Array<number>;
+};
+
+const equalsOne = (n: number) => n === 1;
+const greaterThanOne = (n: number) => n > 1;
 
 //COLLECTION CLASSES
 //BASE defn
@@ -107,5 +123,75 @@ export class CollectionsGroup extends CollectionsBase<
       });
     }
     this.data.get(keyType)?.get(keyPositions)?.canContainNumbers.add(value);
+  };
+}
+
+class CollectionsBase2<CollectionType> {
+  protected data: Map<string, CollectionType>;
+  constructor() {
+    this.data = new Map();
+  }
+
+  get values() {
+    return this.data;
+  }
+}
+
+export class CollectionsGroup2 extends CollectionsBase2<ClusterType> {
+  constructor() {
+    super();
+  }
+  add = (params: ClusterParams2, value: number): void => {
+    const { type, index, positions } = params;
+    const key = `${type}.${index}[${positions.join()}]`;
+    if (!this.data.has(key)) {
+      this.data.set(key, {
+        ...params,
+        contains: new Set(),
+      });
+    }
+    this.data.get(key)?.contains.add(value);
+  };
+
+  private getCluster = (range: (n: number) => boolean) => {
+    const singles = [];
+    for (let [_key, item] of this.data) {
+      if (
+        range(item.contains.size) &&
+        item.contains.size === item.positions.length
+      ) {
+        singles.push({
+          ...item,
+          type: item.type as GroupType,
+          contains: [...item.contains],
+        });
+      }
+    }
+    return singles;
+  };
+
+  get singles() {
+    return this.getCluster(equalsOne);
+  }
+
+  get groups() {
+    return this.getCluster(greaterThanOne);
+  }
+}
+
+export class CollectionsGroup3 extends CollectionsBase2<CollectionTypeIndexNumberProperties> {
+  constructor() {
+    super();
+  }
+  add = (params: CollectionTypeIndexNumberInputs, value: number): void => {
+    const { type, index, number } = params;
+    const key = `${type}.${index}:${number}`;
+    if (!this.data.has(key)) {
+      this.data.set(key, {
+        ...params,
+        possibles: new Set(),
+      });
+    }
+    this.data.get(key)?.possibles.add(value);
   };
 }

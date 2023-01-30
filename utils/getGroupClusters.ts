@@ -1,10 +1,16 @@
-import { CollectionTypeIndexNumber, CollectionsGroup } from "./collections";
+import Square from "@/components/Square";
+import {
+  CollectionTypeIndexNumber,
+  CollectionsGroup,
+  CollectionsGroup2,
+  CollectionsGroup3,
+} from "./collections";
 import { getBlockingClusters } from "./getBlockingClusters";
 import { groupIndeces, GroupType } from "./indexTransforms";
 
 export const getGroupClusters = (
   possibles: ReadonlyMap<number, Set<number>>,
-  groupings: CollectionTypeIndexNumber
+  groupings: CollectionsGroup3
 ) => {
   //function find group clusters
   //fold groups into row 0, clusters boxes (in lines)?
@@ -12,271 +18,143 @@ export const getGroupClusters = (
   // func clusters = getClusters(groupings)
   // reverses position and possibles
   //console.log(groupings);
-  const clustersGroups = new CollectionsGroup();
-  const clustersNumbers = new CollectionsGroup();
+
+  //const clustersGroups = new CollectionsGroup();
+  const clustersNumbers = new CollectionsGroup2();
+  const clustersGroups2 = new CollectionsGroup2();
   for (let [key, group] of groupings.values) {
     //type,index number/possible clusters
-    console.log("group", group);
-    clustersGroups.add({
+    /*clustersGroups.add({
       value: group.number,
       type: group.type,
       index: group.index,
       positions: [...group.possibles],
-    });
+    });*/
+
+    clustersGroups2.add(
+      {
+        type: group.type,
+        index: group.index,
+        positions: [...group.possibles],
+      },
+      group.number
+    );
 
     //type,number index/possible clusters
-    clustersNumbers.add({
-      // add is the params, creates a record of 2 sets/arrays possible positions/possible numbers in group
-      value: group.index,
-      type: group.type,
-      index: group.number,
-      positions: [...group.possibles],
-    });
+    clustersNumbers.add(
+      {
+        type: group.type,
+        index: group.number,
+        positions: [...group.possibles],
+      },
+      group.index
+    );
   }
   // clusters now a map of uniquie possible sets as keys and position distribution as values;
+  console.log("groups_numbers", clustersNumbers.groups);
+  console.log("singles", clustersGroups2.singles);
+  console.log("groups", clustersGroups2.groups);
 
   const groups: unknown = [];
-  const singles: unknown = [];
+  const singles: {}[] = [];
 
-  type GroupType = "row" | "col" | "box";
+  type GroupType = "row" | "col" | "box" | "segment";
 
-  interface cluster {
+  interface Cluster {
     type: GroupType;
-    canContain: number[];
-    positionCluster: number[];
+    contains: number[];
+    positions: number[];
     index: number;
   }
-
-  let b: cluster[] = getBlockingClusters(clustersGroups, 1) as cluster[];
-  let x: cluster[] = getBlockingClusters(clustersNumbers, 2) as cluster[];
-
-  console.log(b);
-  console.log(x);
 
   const clusterRemovables: {}[] = [];
 
   // get related squares x wing and blocked squares
-  function getContainedSquaresXwing(cluster: {
-    type: GroupType;
-    canContain: number[];
-    positionCluster: number[];
-    index: number;
-  }) {
-    return cluster.canContain.map((idx: number) => [
-      ...groupIndeces[cluster.type](idx).filter((n, idx) =>
-        cluster.positionCluster.includes(idx)
-      ),
-    ]);
+  function getContainedSquaresXwing(cluster: Cluster): number[] {
+    return cluster.contains
+      .map((idx: number) => [
+        ...groupIndeces[cluster.type](idx).filter((n, idx) =>
+          cluster.positions.includes(idx)
+        ),
+      ])
+      .flat();
   }
 
-  function getRelatedSquaresXwing(cluster: {
-    type: GroupType;
-    canContain: number[];
-    positionCluster: number[];
-    index: number;
-  }) {
-    if (cluster.type === "box") {
-      return [];
-    }
+  function getRelatedSquaresXwing(cluster: Cluster): number[] {
     const oppositeType = cluster.type === "row" ? "col" : "row";
-    return cluster.positionCluster.map((idx: number) => [
-      ...groupIndeces[oppositeType](idx),
-    ]);
+    return cluster.positions
+      .map((idx: number) => [...groupIndeces[oppositeType](idx)])
+      .flat(); //very testable!
   }
 
-  x.forEach(
-    (cluster: {
-      type: GroupType;
-      canContain: number[];
-      positionCluster: number[];
-      index: number;
-    }) => {
-      let a = getContainedSquaresXwing(cluster).flat();
-      let b = getRelatedSquaresXwing(cluster).flat();
-      let c = b.filter((c) => !a.includes(c));
-      console.log(a, b, c);
-      let d = c.filter((e) => possibles.get(e)?.has(cluster.index));
-      console.log(d);
-      clusterRemovables.push({
-        group: a,
-        related: b,
-        canRemove: { square: d, num: cluster.index },
-        because: "because xwing",
-      });
+  clustersNumbers.groups.forEach((cluster: Cluster) => {
+    if (cluster.type === "box") {
+      return; // filter this idiomatic
     }
-  );
+    let contained = getContainedSquaresXwing(cluster);
+    let related = getRelatedSquaresXwing(cluster).filter(
+      (i) => !contained.includes(i)
+    );
+    let deletable = related.filter((i) => possibles.get(i)?.has(cluster.index));
 
-  function getContainedSquaresGroup(cluster: {
-    type: GroupType;
-    canContain: number[];
-    positionCluster: number[];
-    index: number;
-  }) {
+    clusterRemovables.push({
+      group: contained,
+      related,
+      canRemove: { square: deletable, num: cluster.index },
+      because: "because xwing",
+    });
+  });
+
+  function getContainedSquaresGroup(cluster: Cluster): number[] {
     return [
       ...groupIndeces[cluster.type](cluster.index).filter((n, idx) =>
-        cluster.positionCluster.includes(idx)
+        cluster.positions.includes(idx)
       ),
     ];
   }
 
-  function getRelatedSquaresGroup(cluster: {
-    type: GroupType;
-    canContain: number[];
-    positionCluster: number[];
-    index: number;
-  }) {
+  function getRelatedSquaresGroup(cluster: Cluster): number[] {
     return [...groupIndeces[cluster.type](cluster.index)];
   }
 
-  b.forEach(
-    (cluster: {
-      type: GroupType;
-      canContain: number[];
-      positionCluster: number[];
-      index: number;
-    }) => {
-      let a = getContainedSquaresGroup(cluster);
-      const canRemove: unknown[] = [];
-      if (cluster.canContain.length === 1) {
-        //singles.push()
-        console.log("single", cluster, a);
-      } else {
-        let c = getRelatedSquaresGroup(cluster).filter((c) => !a.includes(c));
-        c.forEach((square) => {
-          cluster.canContain.forEach((num) => {
-            if (possibles.get(square)?.has(num)) {
-              canRemove.push({ num, square });
-            }
-          });
-        });
-        a.forEach((square) => {
-          const p = [...(possibles.get(square) ?? [])];
-          p.forEach((num) => {
-            if (!cluster.canContain.includes(num)) {
-              canRemove.push({ num, square });
-            }
-          });
-        });
-        console.log(a, c, canRemove);
-        // push can removes cluster, a, c, can remove, can contain
-        clusterRemovables.push({
-          group: a,
-          related: c,
-          canRemove,
-          because: "because group",
-        });
-      }
-    }
-  );
-
-  console.log(clusterRemovables);
-
-  /*for (let [_key, item] of clusters.values) {
-    //item = possible clusterBlock
-    for (let [_key, obj] of item) {
-      //obj =
-      // only process groups not number groupss here where > 1
-      if (obj.isNumberCluster && obj.positionCluster.length === 1) {
-        continue;
-      } // skip single num as picked up elswheres
-
-      if (obj.positionCluster.length !== obj.canContainNumbers.size) {
-        continue;
-      }
-
-      if (obj.positionCluster.length === 1) {
-        singles.push({
-          square: groupIndeces[obj.type as GroupType](obj.index)[
-            obj.positionCluster[0]
-          ],
-          type: obj.type,
-          number: [...obj.canContainNumbers][0],
-          because: `only place this number can go on this ${obj.type}`,
-        });
-      }
-
-      //xwing
-      if (obj.positionCluster.length > 1 && obj.isNumberCluster) {
-        if (obj.type === "box") {
-          continue;
+  clustersGroups2.groups.forEach((cluster: Cluster) => {
+    let contained = getContainedSquaresGroup(cluster);
+    const canRemove: unknown[] = [];
+    let related = getRelatedSquaresGroup(cluster).filter(
+      (c) => !contained.includes(c)
+    );
+    related.forEach((square) => {
+      cluster.contains.forEach((num) => {
+        if (possibles.get(square)?.has(num)) {
+          canRemove.push({ num, square });
         }
-        const oppositeType = obj.type === "row" ? "col" : "row";
-        const canDelete = [];
-        obj.positionCluster.forEach((opp) => {
-          const canRemoveOuter = groupIndeces[oppositeType](opp)
-            .filter(
-              (i, idx) =>
-                !obj.canContainNumbers.has(idx) &&
-                [...(possibles.get(i) || [])].includes(obj.index)
-            )
-            .map((i) => ({ idx: i, vals: [obj.index] }));
-          //console.log(canRemoveOuter);
-          if (canRemoveOuter.length) {
-            groups.push({ ...obj, canRemoveOuter, because: "xwing" });
-          }
-        });
-      }
+      });
+    });
+    contained.forEach((square) => {
+      const p = [...(possibles.get(square) ?? [])];
+      p.forEach((num) => {
+        if (!cluster.contains.includes(num)) {
+          canRemove.push({ num, square });
+        }
+      });
+    });
 
-      //grouping
-      if (obj.positionCluster.length > 1 && !obj.isNumberCluster) {
-        let related = groupIndeces[obj.type as GroupType](obj.index).map(
-          (idx: number) => ({
-            idx,
-            vals: possibles.get(idx),
-          })
-        );
-        let canRemoveInnerFind = related.filter(
-          (i: { idx: number; vals: Set<number> | undefined }, idx: number) => {
-            if (i.vals && obj.positionCluster.includes(idx)) {
-              let trim = [...i.vals].filter((i) =>
-                [...obj.canContainNumbers].includes(i)
-              );
-              if (i.vals && trim.length) {
-                return true;
-              }
-            }
-          }
-        ) as Array<{ idx: number; vals: Set<number> }>;
-        let canRemoveInner = canRemoveInnerFind.map(
-          (i: { idx: number; vals: Set<number> }) => ({
-            idx: i.idx,
-            vals: [...i.vals].filter(
-              (i) => ![...obj.canContainNumbers].includes(i)
-            ),
-          })
-        );
-        let canRemoveOuter = related
-          .filter(
-            (
-              i: { idx: number; vals: Set<number> | undefined },
-              idx: number
-            ) => {
-              if (i.vals && !obj.positionCluster.includes(idx)) {
-                let trim = [...i.vals].filter((i) =>
-                  [...obj.canContainNumbers].includes(i)
-                );
-                if (trim.length) {
-                  return true;
-                }
-              }
-            }
-          )
-          .map((i) => ({ ...i, vals: [...(i.vals ?? [])] }));
-        groups.push({
-          ...obj,
-          related,
-          canRemoveOuter: [...canRemoveOuter, ...canRemoveInner],
-          because: `group ${obj.type} ${obj.index} ${obj?.canContainNumbers}`,
-        });
-      }
-    }
-  }*/
+    clusterRemovables.push({
+      group: contained,
+      related,
+      canRemove,
+      because: "because group",
+    });
+  });
 
-  console.log("clusters", clustersGroups);
-  console.log("clusters", clustersNumbers);
+  const solvedSingles = clustersGroups2.singles.map((single) => ({
+    square: groupIndeces[single.type](single.index)[single.positions[0]],
+    number: single.contains[0],
+    because: `${single.contains[0]} can only appear in ${single.type} in this position`,
+  }));
 
   return {
-    groups,
-    singles,
+    groupRemovers: clusterRemovables,
+    solvedSingles,
   };
 };
