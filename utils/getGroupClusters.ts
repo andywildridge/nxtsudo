@@ -53,6 +53,8 @@ export const getGroupClusters = (
   console.log(b);
   console.log(x);
 
+  const clusterRemovables: {}[] = [];
+
   // get related squares x wing and blocked squares
   function getContainedSquaresXwing(cluster: {
     type: GroupType;
@@ -95,6 +97,12 @@ export const getGroupClusters = (
       console.log(a, b, c);
       let d = c.filter((e) => possibles.get(e)?.has(cluster.index));
       console.log(d);
+      clusterRemovables.push({
+        group: a,
+        related: b,
+        canRemove: { square: d, num: cluster.index },
+        because: "because xwing",
+      });
     }
   );
 
@@ -127,12 +135,41 @@ export const getGroupClusters = (
       positionCluster: number[];
       index: number;
     }) => {
-      let a = getContainedSquaresGroup(cluster).flat();
-      let b = getRelatedSquaresGroup(cluster).flat();
-      //let c = b.filter((c) => !a.includes(c));
-      console.log(a, b);
+      let a = getContainedSquaresGroup(cluster);
+      const canRemove: unknown[] = [];
+      if (cluster.canContain.length === 1) {
+        //singles.push()
+        console.log("single", cluster, a);
+      } else {
+        let c = getRelatedSquaresGroup(cluster).filter((c) => !a.includes(c));
+        c.forEach((square) => {
+          cluster.canContain.forEach((num) => {
+            if (possibles.get(square)?.has(num)) {
+              canRemove.push({ num, square });
+            }
+          });
+        });
+        a.forEach((square) => {
+          const p = [...(possibles.get(square) ?? [])];
+          p.forEach((num) => {
+            if (!cluster.canContain.includes(num)) {
+              canRemove.push({ num, square });
+            }
+          });
+        });
+        console.log(a, c, canRemove);
+        // push can removes cluster, a, c, can remove, can contain
+        clusterRemovables.push({
+          group: a,
+          related: c,
+          canRemove,
+          because: "because group",
+        });
+      }
     }
   );
+
+  console.log(clusterRemovables);
 
   /*for (let [_key, item] of clusters.values) {
     //item = possible clusterBlock
