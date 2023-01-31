@@ -74,30 +74,6 @@ interface CollectionTypeIndexNumberProperties
   extends CollectionTypeIndexNumberInputs {
   possibles: Set<number>;
 }
-export class CollectionTypeIndexNumber extends CollectionsBase<
-  string,
-  CollectionTypeIndexNumberProperties
-> {
-  constructor() {
-    super();
-  }
-  add = (
-    { type, index, number }: CollectionTypeIndexNumberInputs,
-    position: number
-  ): void => {
-    // setter
-    const key = `${type}.${index}:${number}`;
-    if (!this.data.has(key)) {
-      this.data.set(key, {
-        type,
-        index,
-        number,
-        possibles: new Set(),
-      });
-    }
-    this.data.get(key)?.possibles.add(position);
-  };
-}
 
 export class CollectionsGroup extends CollectionsBase<
   string,

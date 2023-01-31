@@ -1,36 +1,16 @@
-import Square from "@/components/Square";
-import {
-  CollectionTypeIndexNumber,
-  CollectionsGroup,
-  CollectionsGroup2,
-  CollectionsGroup3,
-} from "./collections";
+import { CollectionsGroup2, CollectionsGroup3 } from "./collections";
 import { getBlockingClusters } from "./getBlockingClusters";
 import { groupIndeces, GroupType } from "./indexTransforms";
+import Removables from "./Removable";
 
 export const getGroupClusters = (
   possibles: ReadonlyMap<number, Set<number>>,
-  groupings: CollectionsGroup3
+  groupings: CollectionsGroup3,
+  rems: Removables
 ) => {
-  //function find group clusters
-  //fold groups into row 0, clusters boxes (in lines)?
-  //fold groups into rows/cols, , number n, clusters
-  // func clusters = getClusters(groupings)
-  // reverses position and possibles
-  //console.log(groupings);
-
-  //const clustersGroups = new CollectionsGroup();
   const clustersNumbers = new CollectionsGroup2();
   const clustersGroups2 = new CollectionsGroup2();
   for (let [key, group] of groupings.values) {
-    //type,index number/possible clusters
-    /*clustersGroups.add({
-      value: group.number,
-      type: group.type,
-      index: group.index,
-      positions: [...group.possibles],
-    });*/
-
     clustersGroups2.add(
       {
         type: group.type,
@@ -51,9 +31,9 @@ export const getGroupClusters = (
     );
   }
   // clusters now a map of uniquie possible sets as keys and position distribution as values;
-  console.log("groups_numbers", clustersNumbers.groups);
+  /*console.log("groups_numbers", clustersNumbers.groups);
   console.log("singles", clustersGroups2.singles);
-  console.log("groups", clustersGroups2.groups);
+  console.log("groups", clustersGroups2.groups);*/
 
   const groups: unknown = [];
   const singles: {}[] = [];
@@ -67,7 +47,7 @@ export const getGroupClusters = (
     index: number;
   }
 
-  const clusterRemovables: {}[] = [];
+  //const rems = new Removables();
 
   // get related squares x wing and blocked squares
   function getContainedSquaresXwing(cluster: Cluster): number[] {
@@ -95,13 +75,15 @@ export const getGroupClusters = (
     let related = getRelatedSquaresXwing(cluster).filter(
       (i) => !contained.includes(i)
     );
-    let deletable = related.filter((i) => possibles.get(i)?.has(cluster.index));
+    let deletable = related
+      .filter((i) => possibles.get(i)?.has(cluster.index))
+      .map((i) => ({ number: cluster.index, square: i }));
 
-    clusterRemovables.push({
-      group: contained,
+    rems.add({
+      because: "xwing",
+      deletable,
       related,
-      canRemove: { square: deletable, num: cluster.index },
-      because: "because xwing",
+      contained,
     });
   });
 
@@ -119,31 +101,31 @@ export const getGroupClusters = (
 
   clustersGroups2.groups.forEach((cluster: Cluster) => {
     let contained = getContainedSquaresGroup(cluster);
-    const canRemove: unknown[] = [];
+    const canRemove: { square: number; number: number }[] = [];
     let related = getRelatedSquaresGroup(cluster).filter(
       (c) => !contained.includes(c)
     );
     related.forEach((square) => {
-      cluster.contains.forEach((num) => {
-        if (possibles.get(square)?.has(num)) {
-          canRemove.push({ num, square });
+      cluster.contains.forEach((number) => {
+        if (possibles.get(square)?.has(number)) {
+          canRemove.push({ number, square });
         }
       });
     });
     contained.forEach((square) => {
       const p = [...(possibles.get(square) ?? [])];
-      p.forEach((num) => {
-        if (!cluster.contains.includes(num)) {
-          canRemove.push({ num, square });
+      p.forEach((number) => {
+        if (!cluster.contains.includes(number)) {
+          canRemove.push({ number, square });
         }
       });
     });
 
-    clusterRemovables.push({
-      group: contained,
+    rems.add({
+      because: "group",
+      deletable: canRemove,
       related,
-      canRemove,
-      because: "because group",
+      contained,
     });
   });
 
@@ -153,8 +135,10 @@ export const getGroupClusters = (
     because: `${single.contains[0]} can only appear in ${single.type} in this position`,
   }));
 
+  console.log("CL", rems);
+
   return {
-    groupRemovers: clusterRemovables,
+    groupRemovers: rems,
     solvedSingles,
   };
 };

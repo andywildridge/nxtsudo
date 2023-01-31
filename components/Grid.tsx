@@ -21,7 +21,7 @@ export default function Grid() {
         solved,
         solvable: newanalysis.solvable,
         removable: newanalysis.removable,
-        remByIdx: newanalysis.remByIdx,
+        groupRemovers: newanalysis.groupRemovers,
       });
     }
   };
@@ -33,7 +33,7 @@ export default function Grid() {
         const squareStyle = `${
           sudoState.initialClues?.includes(idx) ? "font-bold" : ""
         } ${sudoState.solvable[idx] ? "bg-red-100" : ""} ${
-          sudoState.remByIdx[idx] ? "bg-yellow-100" : ""
+          sudoState.groupRemovers.indeces[idx] ? "bg-yellow-100" : ""
         }`;
         return (
           <div

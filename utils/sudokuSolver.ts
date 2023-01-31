@@ -2,9 +2,7 @@ import { info } from "./init";
 import { analyse } from "./analyse";
 
 const { possibles, solved } = info;
-const { solvable, removable, remByIdx } = analyse(possibles);
-
-console.log(remByIdx);
+const { solvable, removable, groupRemovers } = analyse(possibles);
 
 export const initVals = {
   possibles,
@@ -12,5 +10,5 @@ export const initVals = {
   solved,
   solvable,
   removable,
-  remByIdx,
+  groupRemovers,
 };

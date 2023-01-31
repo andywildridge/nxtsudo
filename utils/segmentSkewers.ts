@@ -1,10 +1,12 @@
 import { groupIndeces } from "./indexTransforms";
+import Removables from "./Removable";
 
 export const getSegementDeletors = (
   possibles: ReadonlyMap<number, Set<number>>,
   segments: Map<string, boolean>
 ) => {
   const segDeletors = [];
+  const rems = new Removables();
 
   for (let [key] of segments) {
     let [idx, num] = key.split(".");
@@ -39,6 +41,13 @@ export const getSegementDeletors = (
           groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(+num))
         );
         //console.log(idx);
+        rems.add({
+          because: `neighbour linear skewer seg ${key}`,
+          deletable: idx.map((s) => ({ square: idx[0], number: +num })),
+          related: [1],
+          contained: [1],
+        });
+
         segDeletors.push({
           num: +num,
           idx,
@@ -49,6 +58,12 @@ export const getSegementDeletors = (
         let idx = neighboursBox.flatMap((i) =>
           groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(+num))
         );
+        rems.add({
+          because: `neighbour linear skewer seg ${key}`,
+          deletable: idx.map((s) => ({ square: idx[0], number: +num })),
+          related: [1],
+          contained: [1],
+        });
         //console.log(idx);
         segDeletors.push({
           num: +num,
@@ -59,5 +74,12 @@ export const getSegementDeletors = (
     }
   }
 
-  return segDeletors;
+  /*rems.add({
+    because: "seg",
+    deletable: [{ square: 5, number: 3 }],
+    related: [1],
+    contained: [1],
+  });*/
+
+  return rems;
 };
