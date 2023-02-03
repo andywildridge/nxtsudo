@@ -21,13 +21,13 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     segmentRemovers
   );
 
-  console.log("////////////////////");
+  /*console.log("////////////////////");
   console.log("solvable squares", solvableSquare);
   console.log("segmentRemovers", segmentRemovers);
   console.log("GRP", groupRemovers);
   console.log(groupRemovers.indeces);
   console.log(groupRemovers.data);
-  console.log("solvedSingles from groups", solvedSingles);
+  console.log("solvedSingles from groups", solvedSingles);*/
   const singles = [...solvableSquare, ...solvedSingles];
 
   console.log("all solved", singles);

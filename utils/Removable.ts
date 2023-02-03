@@ -12,6 +12,9 @@ interface Rem {
 
 export default class Removables {
   private removables: Removable[] = [];
+  static merge(a: Removables, b: Removables) {
+    return new Removables(); //[...a, ...b];
+  }
   add(item: Removable) {
     this.removables.push(item);
   }

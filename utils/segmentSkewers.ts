@@ -5,12 +5,13 @@ export const getSegementDeletors = (
   possibles: ReadonlyMap<number, Set<number>>,
   segments: Map<string, boolean>
 ) => {
-  const segDeletors = [];
   const rems = new Removables();
 
   for (let [key] of segments) {
-    let [idx, num] = key.split(".");
-    let third = +idx % 3;
+    let [idx, num] = key.split("."); // sort type idx, num and quantity?
+
+    //neigbours linear
+    let third = +idx % 3; // segment index 1-3
     let neighbours = [0, 1, 2]
       .filter((i) => i !== third)
       .map((i) => +idx + (i - third));
@@ -21,6 +22,8 @@ export const getSegementDeletors = (
     ) {
       z[0] = true;
     }
+
+    //neigbours box
     let x = Math.floor((+idx % 9) / 3);
     let neighboursBox = [0, 1, 2]
       .filter((i) => i !== x)
@@ -31,6 +34,8 @@ export const getSegementDeletors = (
     ) {
       z[1] = true;
     }
+
+    //is it a skewer?
     if (z[0] !== z[1]) {
       //its a skewer
       //console.log(key, third, neighbours, z[0]);
@@ -48,12 +53,6 @@ export const getSegementDeletors = (
           related: [1],
           contained: [1],
         });
-
-        segDeletors.push({
-          num: +num,
-          idx,
-          because: `neighbour linear skewer seg ${key}`,
-        });
       } else {
         // check neighboursbox for deletes box
         let idx = neighboursBox.flatMap((i) =>
@@ -65,22 +64,9 @@ export const getSegementDeletors = (
           related: [1],
           contained: [1],
         });
-        //console.log(idx);
-        segDeletors.push({
-          num: +num,
-          idx,
-          because: `neighbour box skewer seg ${key}`,
-        });
       }
     }
   }
-
-  /*rems.add({
-    because: "seg",
-    deletable: [{ square: 5, number: 3 }],
-    related: [1],
-    contained: [1],
-  });*/
 
   return rems;
 };
