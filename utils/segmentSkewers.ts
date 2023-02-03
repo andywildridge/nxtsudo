@@ -1,72 +1,75 @@
 import { groupIndeces } from "./indexTransforms";
 import Removables from "./Removable";
 
+export function getNeighbourIds(idx: number, type: "linear" | "box") {
+  // segment index 1-3
+  let filterType = type === "linear" ? idx % 3 : Math.floor((idx % 9) / 3);
+  const mapFn = (idx: number, i: number): number =>
+    type === "linear" ? idx + i - filterType : idx + (i - filterType) * 3;
+  return [0, 1, 2].filter((i) => i !== filterType).map((i) => mapFn(idx, i));
+}
+
+export function hasSegments(
+  indeces: number[],
+  num: number,
+  segments: Map<string, boolean>
+) {
+  return indeces.some((i) => segments.has(`${i}.${num}`));
+}
+
+export const getBoxAndLinearNeighbours = (
+  idx: number,
+  number: number,
+  segments: Map<string, boolean>
+) => {
+  const linearNeighbours = getNeighbourIds(idx, "linear");
+  const boxNeighbours = getNeighbourIds(idx, "box");
+  const hasLinearNeighbours = hasSegments(linearNeighbours, number, segments);
+  const hasBoxNeighbours = hasSegments(boxNeighbours, number, segments);
+  return {
+    hasLinearNeighbours,
+    hasBoxNeighbours,
+  };
+};
+
+function getRemovables(
+  idx: number,
+  num: number,
+  type: "linear" | "box",
+  possibles: ReadonlyMap<number, Set<number>>
+) {
+  let indeces = getNeighbourIds(idx, type).flatMap((i) =>
+    groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(num))
+  );
+  return {
+    because: `neighbour ${type} skewer seg ${idx}:${num}`,
+    deletable: indeces.map((s) => ({ square: s, number: num })),
+    related: [1],
+    contained: [1],
+  };
+}
+
 export const getSegementDeletors = (
   possibles: ReadonlyMap<number, Set<number>>,
   segments: Map<string, boolean>
 ) => {
-  const rems = new Removables();
+  const removables = new Removables();
 
   for (let [key] of segments) {
-    let [idx, num] = key.split("."); // sort type idx, num and quantity?
-
-    //neigbours linear
-    let third = +idx % 3; // segment index 1-3
-    let neighbours = [0, 1, 2]
-      .filter((i) => i !== third)
-      .map((i) => +idx + (i - third));
-    let z = [false, false];
-    if (
-      !segments.has(`${[neighbours[0]]}.${num}`) &&
-      !segments.has(`${[neighbours[1]]}.${num}`)
-    ) {
-      z[0] = true;
+    const [idx, num] = key.split(".").map((i) => Number(i));
+    const { hasLinearNeighbours, hasBoxNeighbours } = getBoxAndLinearNeighbours(
+      idx,
+      num,
+      segments
+    );
+    if (hasLinearNeighbours === hasBoxNeighbours) {
+      //skip this segment as cannot delete neighbours
+      continue;
     }
-
-    //neigbours box
-    let x = Math.floor((+idx % 9) / 3);
-    let neighboursBox = [0, 1, 2]
-      .filter((i) => i !== x)
-      .map((i) => +idx + (i - x) * 3);
-    if (
-      !segments.has(`${[neighboursBox[0]]}.${num}`) &&
-      !segments.has(`${[neighboursBox[1]]}.${num}`)
-    ) {
-      z[1] = true;
-    }
-
-    //is it a skewer?
-    if (z[0] !== z[1]) {
-      //its a skewer
-      //console.log(key, third, neighbours, z[0]);
-      //console.log(key, x, neighboursBox, z[1]);
-      //console.log('skewered!');
-      if (!z[0]) {
-        // check neighbours for deletes linear
-        let idx = neighbours.flatMap((i) =>
-          groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(+num))
-        );
-        //console.log(idx);
-        rems.add({
-          because: `neighbour linear skewer seg ${key}`,
-          deletable: idx.map((s) => ({ square: s, number: +num })),
-          related: [1],
-          contained: [1],
-        });
-      } else {
-        // check neighboursbox for deletes box
-        let idx = neighboursBox.flatMap((i) =>
-          groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(+num))
-        );
-        rems.add({
-          because: `neighbour box skewer seg ${key}`,
-          deletable: idx.map((s) => ({ square: s, number: +num })),
-          related: [1],
-          contained: [1],
-        });
-      }
-    }
+    removables.add(
+      getRemovables(idx, num, hasLinearNeighbours ? "linear" : "box", possibles)
+    );
   }
 
-  return rems;
+  return removables;
 };

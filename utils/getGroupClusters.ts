@@ -1,6 +1,5 @@
 import { CollectionsGroup2, CollectionsGroup3 } from "./collections";
-import { getBlockingClusters } from "./getBlockingClusters";
-import { groupIndeces, GroupType } from "./indexTransforms";
+import { groupIndeces } from "./indexTransforms";
 import Removables from "./Removable";
 
 export const getGroupClusters = (
@@ -30,10 +29,6 @@ export const getGroupClusters = (
       group.index
     );
   }
-  // clusters now a map of uniquie possible sets as keys and position distribution as values;
-  /*console.log("groups_numbers", clustersNumbers.groups);
-  console.log("singles", clustersGroups2.singles);
-  console.log("groups", clustersGroups2.groups);*/
 
   const groups: unknown = [];
   const singles: {}[] = [];

@@ -21,13 +21,6 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     segmentRemovers
   );
 
-  /*console.log("////////////////////");
-  console.log("solvable squares", solvableSquare);
-  console.log("segmentRemovers", segmentRemovers);
-  console.log("GRP", groupRemovers);
-  console.log(groupRemovers.indeces);
-  console.log(groupRemovers.data);
-  console.log("solvedSingles from groups", solvedSingles);*/
   const singles = [...solvableSquare, ...solvedSingles];
 
   console.log("all solved", singles);
@@ -40,17 +33,6 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
   });
 
   const removable: Array<{ idx: number; num: number; because: string }> = [];
-
-  /*segmentRemovers.forEach((i) => {
-    i.idx.forEach((j) => {
-      removable.push({ idx: j, num: i.num, because: i.because });
-    });
-  });
-
-  const remByIdx = removable.reduce((acc: Record<number, boolean>, i) => {
-    acc[i.idx] = true;
-    return acc;
-  }, {});*/
 
   console.log("solvable", solvable);
   console.log("removable", removable);

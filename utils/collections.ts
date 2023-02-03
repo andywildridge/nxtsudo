@@ -38,8 +38,8 @@ const greaterThanOne = (n: number) => n > 1;
 
 //COLLECTION CLASSES
 //BASE defn
-class CollectionsBase<KeyType, CollectionType> {
-  protected data: Map<KeyType, CollectionType>;
+class CollectionsBase<CollectionType> {
+  protected data: Map<string, CollectionType>;
   constructor() {
     this.data = new Map();
   }
@@ -50,7 +50,7 @@ class CollectionsBase<KeyType, CollectionType> {
 }
 
 //Generic collection type (combination string keys)
-export class CollectionNumberSet extends CollectionsBase<string, Set<number>> {
+export class GroupMapNumberSet extends CollectionsBase<Set<number>> {
   constructor() {
     super();
   }
@@ -76,7 +76,6 @@ interface CollectionTypeIndexNumberProperties
 }
 
 export class CollectionsGroup extends CollectionsBase<
-  string,
   Map<string, clusterType>
 > {
   constructor() {
@@ -102,18 +101,7 @@ export class CollectionsGroup extends CollectionsBase<
   };
 }
 
-class CollectionsBase2<CollectionType> {
-  protected data: Map<string, CollectionType>;
-  constructor() {
-    this.data = new Map();
-  }
-
-  get values() {
-    return this.data;
-  }
-}
-
-export class CollectionsGroup2 extends CollectionsBase2<ClusterType> {
+export class CollectionsGroup2 extends CollectionsBase<ClusterType> {
   constructor() {
     super();
   }
@@ -155,7 +143,7 @@ export class CollectionsGroup2 extends CollectionsBase2<ClusterType> {
   }
 }
 
-export class CollectionsGroup3 extends CollectionsBase2<CollectionTypeIndexNumberProperties> {
+export class CollectionsGroup3 extends CollectionsBase<CollectionTypeIndexNumberProperties> {
   constructor() {
     super();
   }

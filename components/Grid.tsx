@@ -84,7 +84,7 @@ export default function Grid() {
       </div>
       <div>
         {sudoState.groupRemovers.data.map((i) => (
-          <div key={i.because}>{i.because}</div>
+          <div key={`${i.because}${i.contained}`}>{i.because}</div>
         ))}
       </div>
       <div>{currentSquare}</div>

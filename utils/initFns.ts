@@ -1,5 +1,5 @@
 import { indexToRow, indexToCol, indexToBox } from "./indexTransforms";
-import { CollectionNumberSet } from "./collections";
+import { GroupMapNumberSet } from "./collections";
 
 function getSolvedInGroups(sudo: number[]) {
   return sudo.reduce((accumulator, val: number, idx: number) => {
@@ -9,7 +9,7 @@ function getSolvedInGroups(sudo: number[]) {
       accumulator.add(`box.${indexToBox(idx).idx}`, val);
     }
     return accumulator;
-  }, new CollectionNumberSet()).values;
+  }, new GroupMapNumberSet()).values;
 }
 
 const VALIDNUMBERS: ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9];
