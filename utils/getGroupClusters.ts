@@ -1,16 +1,20 @@
-import { CollectionsGroup2, CollectionsGroup3 } from "./collections";
+import {
+  CollectionsClusters,
+  CollectionsNumbers,
+  GroupType,
+} from "./collections";
 import { groupIndeces } from "./indexTransforms";
 import Removables from "./Removable";
 
 export const getGroupClusters = (
   possibles: ReadonlyMap<number, Set<number>>,
-  groupings: CollectionsGroup3,
-  rems: Removables
+  groupings: CollectionsNumbers,
+  removables: Removables
 ) => {
-  const clustersNumbers = new CollectionsGroup2();
-  const clustersGroups2 = new CollectionsGroup2();
+  const clustersNumbers = new CollectionsClusters();
+  const clustersGroups = new CollectionsClusters();
   for (let [key, group] of groupings.values) {
-    clustersGroups2.add(
+    clustersGroups.add(
       {
         type: group.type,
         index: group.index,
@@ -30,11 +34,6 @@ export const getGroupClusters = (
     );
   }
 
-  const groups: unknown = [];
-  const singles: {}[] = [];
-
-  type GroupType = "row" | "col" | "box" | "segment";
-
   interface Cluster {
     type: GroupType;
     contains: number[];
@@ -42,9 +41,6 @@ export const getGroupClusters = (
     index: number;
   }
 
-  //const rems = new Removables();
-
-  // get related squares x wing and blocked squares
   function getContainedSquaresXwing(cluster: Cluster): number[] {
     return cluster.contains
       .map((idx: number) => [
@@ -74,7 +70,7 @@ export const getGroupClusters = (
       .filter((i) => possibles.get(i)?.has(cluster.index))
       .map((i) => ({ number: cluster.index, square: i }));
 
-    rems.add({
+    removables.add({
       because: "xwing",
       deletable,
       related,
@@ -94,7 +90,7 @@ export const getGroupClusters = (
     return [...groupIndeces[cluster.type](cluster.index)];
   }
 
-  clustersGroups2.groups.forEach((cluster: Cluster) => {
+  clustersGroups.groups.forEach((cluster: Cluster) => {
     let contained = getContainedSquaresGroup(cluster);
     const canRemove: { square: number; number: number }[] = [];
     let related = getRelatedSquaresGroup(cluster).filter(
@@ -116,7 +112,7 @@ export const getGroupClusters = (
       });
     });
 
-    rems.add({
+    removables.add({
       because: "group",
       deletable: canRemove,
       related,
@@ -124,16 +120,14 @@ export const getGroupClusters = (
     });
   });
 
-  const solvedSingles = clustersGroups2.singles.map((single) => ({
+  const solvedSingles = clustersGroups.singles.map((single) => ({
     square: groupIndeces[single.type](single.index)[single.positions[0]],
     number: single.contains[0],
     because: `${single.contains[0]} can only appear in ${single.type} in this position`,
   }));
 
-  console.log("CL", rems);
-
   return {
-    groupRemovers: rems,
+    groupRemovers: removables,
     solvedSingles,
   };
 };

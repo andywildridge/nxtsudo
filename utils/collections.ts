@@ -1,43 +1,6 @@
-//TYPES
-type clusterType = {
-  type: string;
-  index: number;
-  positionCluster: Array<number>;
-  canContainNumbers: Set<number>;
-  canRemoveInner?: any;
-};
+export type GroupType = "row" | "col" | "box" | "segment";
 
-type ClusterType = {
-  type: string;
-  index: number;
-  positions: Array<number>;
-  contains: Set<number>;
-};
-
-type groupType = {
-  positions: Set<number>;
-  type: string;
-  number: number;
-};
-
-type ClusterParams = {
-  value: number;
-  type: string;
-  index: number;
-  positions: Array<number>;
-};
-
-type ClusterParams2 = {
-  type: string;
-  index: number;
-  positions: Array<number>;
-};
-
-const equalsOne = (n: number) => n === 1;
-const greaterThanOne = (n: number) => n > 1;
-
-//COLLECTION CLASSES
-//BASE defn
+//BASE class defn
 class CollectionsBase<CollectionType> {
   protected data: Map<string, CollectionType>;
   constructor() {
@@ -49,7 +12,6 @@ class CollectionsBase<CollectionType> {
   }
 }
 
-//Generic collection type (combination string keys)
 export class GroupMapNumberSet extends CollectionsBase<Set<number>> {
   constructor() {
     super();
@@ -63,27 +25,51 @@ export class GroupMapNumberSet extends CollectionsBase<Set<number>> {
   };
 }
 
-type GroupType = "row" | "col" | "box" | "segment";
-
-interface CollectionTypeIndexNumberInputs {
+type GroupIndex = {
   type: GroupType;
   index: number;
+};
+
+interface CollectionNumberParams extends GroupIndex {
   number: number;
 }
-interface CollectionTypeIndexNumberProperties
-  extends CollectionTypeIndexNumberInputs {
+interface CollectionNumberData extends CollectionNumberParams {
   possibles: Set<number>;
 }
-
-export class CollectionsGroup extends CollectionsBase<
-  Map<string, clusterType>
-> {
+export class CollectionsNumbers extends CollectionsBase<CollectionNumberData> {
   constructor() {
     super();
   }
-  add = (params: ClusterParams): void => {
+  add = (params: CollectionNumberParams, value: number): void => {
+    const { type, index, number } = params;
+    const key = `${type}.${index}:${number}`;
+    if (!this.data.has(key)) {
+      this.data.set(key, {
+        ...params,
+        possibles: new Set(),
+      });
+    }
+    this.data.get(key)?.possibles.add(value);
+  };
+}
+
+interface GroupParams extends GroupIndex {
+  value: number;
+  positions: Array<number>;
+}
+
+export interface GroupData extends GroupIndex {
+  positionCluster: Array<number>;
+  canContainNumbers: Set<number>;
+}
+
+export class CollectionsGroup extends CollectionsBase<Map<string, GroupData>> {
+  constructor() {
+    super();
+  }
+  add = (params: GroupParams): void => {
     // setter
-    const { value, type, index, positions } = params;
+    const { type, index, value, positions } = params;
     const keyType = `${type}.${index}`;
     const keyPositions = positions.join();
     if (!this.data.has(keyType)) {
@@ -101,11 +87,17 @@ export class CollectionsGroup extends CollectionsBase<
   };
 }
 
-export class CollectionsGroup2 extends CollectionsBase<ClusterType> {
+interface ClusterParams extends GroupIndex {
+  positions: Array<number>;
+}
+export interface ClusterData extends ClusterParams {
+  contains: Set<number>;
+}
+export class CollectionsClusters extends CollectionsBase<ClusterData> {
   constructor() {
     super();
   }
-  add = (params: ClusterParams2, value: number): void => {
+  add = (params: ClusterParams, value: number): void => {
     const { type, index, positions } = params;
     const key = `${type}.${index}[${positions.join()}]`;
     if (!this.data.has(key)) {
@@ -118,44 +110,27 @@ export class CollectionsGroup2 extends CollectionsBase<ClusterType> {
   };
 
   private getCluster = (range: (n: number) => boolean) => {
-    const singles = [];
+    const cluster = [];
     for (let [_key, item] of this.data) {
       if (
         range(item.contains.size) &&
         item.contains.size === item.positions.length
       ) {
-        singles.push({
+        cluster.push({
           ...item,
           type: item.type as GroupType,
           contains: [...item.contains],
         });
       }
     }
-    return singles;
+    return cluster;
   };
 
   get singles() {
-    return this.getCluster(equalsOne);
+    return this.getCluster((n: number) => n === 1);
   }
 
   get groups() {
-    return this.getCluster(greaterThanOne);
+    return this.getCluster((n: number) => n > 1);
   }
-}
-
-export class CollectionsGroup3 extends CollectionsBase<CollectionTypeIndexNumberProperties> {
-  constructor() {
-    super();
-  }
-  add = (params: CollectionTypeIndexNumberInputs, value: number): void => {
-    const { type, index, number } = params;
-    const key = `${type}.${index}:${number}`;
-    if (!this.data.has(key)) {
-      this.data.set(key, {
-        ...params,
-        possibles: new Set(),
-      });
-    }
-    this.data.get(key)?.possibles.add(value);
-  };
 }

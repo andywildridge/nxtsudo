@@ -5,12 +5,12 @@ import {
   indexToSegH,
   indexToSegV,
 } from "./indexTransforms";
-import { CollectionsGroup3 } from "./collections";
+import { CollectionsNumbers } from "./collections";
 
 export const processPossibles = (
   possibles: ReadonlyMap<number, Set<number>>
 ) => {
-  let groups = new CollectionsGroup3();
+  let groups = new CollectionsNumbers();
   let segments = new Map<string, boolean>();
   for (let [idx, poss] of possibles) {
     let row = indexToRow(idx);

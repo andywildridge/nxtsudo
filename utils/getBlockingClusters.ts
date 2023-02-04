@@ -4,7 +4,11 @@ export function getBlockingClusters(
   clusters: CollectionsGroup,
   minSize: number
 ) {
-  const blockingCluster: unknown[] = [];
+  const blockingCluster: {
+    positionCluster: Array<number>;
+    canContainNumbers: Set<number>;
+    canContain: number[];
+  }[] = []; //import type?
   clusters.values.forEach((cluster) => {
     cluster.forEach((clusterObj) => {
       if (
