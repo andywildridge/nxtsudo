@@ -7,18 +7,22 @@ import {
 
 function getRemovables(
   idx: number,
-  num: number,
+  number: number,
   type: "linear" | "box",
   possibles: ReadonlyMap<number, Set<number>>
 ) {
   let indeces = getNeighbourIds(idx, type).flatMap((i) =>
-    groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(num))
+    groupIndeces.segment(i).filter((idx) => possibles.get(idx)?.has(number))
   );
+  const deletable = indeces.map((square) => ({ square, number }));
+  const contained = groupIndeces
+    .segment(idx)
+    .filter((idx) => possibles.get(idx)?.has(number));
   return {
-    because: `neighbour ${type} skewer seg ${idx}:${num}`,
-    deletable: indeces.map((s) => ({ square: s, number: num })),
-    related: [1],
-    contained: [1],
+    because: `neighbour ${type} skewer seg ${contained}:${number} can delete ${indeces}\n`,
+    deletable,
+    related: groupIndeces.segment(idx),
+    contained: contained,
   };
 }
 

@@ -20,19 +20,47 @@ describe("CollectionsGroup", () => {
   a.add({ type: "box", index: 1, positions: [1, 2, 3], value: 8 });
   a.add({ type: "box", index: 1, positions: [1, 2, 3], value: 4 });
 
-  const r = {
-    "1,2,3": {
-      index: 1,
-      type: "box",
-      positionCluster: [1, 2, 3],
-      canContainNumbers: new Set([7, 8, 4]),
-    },
-  };
-  const row = {
-    "box.1": new Map(Object.entries(r)),
-  };
-  const map = new Map(Object.entries(row));
   test("a", () => {
+    const nestedRows = {
+      "1,2,3": {
+        index: 1,
+        type: "box",
+        positionCluster: [1, 2, 3],
+        canContainNumbers: new Set([7, 8, 4]),
+      },
+    };
+    const row = {
+      "box.1": new Map(Object.entries(nestedRows)),
+    };
+    const map = new Map(Object.entries(row));
     expect(a.values).toStrictEqual(map);
+  });
+
+  const b = new CollectionsGroup();
+  b.add({ type: "box", index: 1, positions: [1, 2, 3], value: 7 });
+  b.add({ type: "box", index: 1, positions: [1, 2, 3], value: 8 });
+  b.add({ type: "box", index: 1, positions: [1, 2, 3], value: 4 });
+  b.add({ type: "box", index: 1, positions: [1, 5, 6], value: 2 });
+
+  test("b", () => {
+    const nestedRows = {
+      "1,2,3": {
+        index: 1,
+        type: "box",
+        positionCluster: [1, 2, 3],
+        canContainNumbers: new Set([7, 8, 4]),
+      },
+      "1,5,6": {
+        index: 1,
+        type: "box",
+        positionCluster: [1, 5, 6],
+        canContainNumbers: new Set([2]),
+      },
+    };
+    const row = {
+      "box.1": new Map(Object.entries(nestedRows)),
+    };
+    const map = new Map(Object.entries(row));
+    expect(b.values).toStrictEqual(map);
   });
 });

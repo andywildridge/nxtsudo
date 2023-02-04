@@ -28,14 +28,13 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         possibles,
         solved,
         solvable: newanalysis.solvable,
-        removable: newanalysis.removable,
-        groupRemovers: newanalysis.groupRemovers,
+        removables: newanalysis.removables,
       });
     }
   };
 
   const hoverSquare = (idx: number): void => {
-    const removers = sudoState.groupRemovers.indeces[idx];
+    const removers = sudoState.removables.indeces[idx];
     let related: Record<number, boolean> = {};
     let contained: Record<number, boolean> = {};
     let because = "";
@@ -68,7 +67,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
             sudoState.initialClues?.includes(idx) ? "font-bold" : ""
           } 
           ${sudoState.solvable[idx] ? "bg-red-100" : ""} 
-          ${sudoState.groupRemovers.indeces[idx] ? "bg-yellow-100" : ""}
+          ${sudoState.removables.indeces[idx] ? "bg-yellow-100" : ""}
           ${relatedSquares[idx] ? "bg-blue-100" : ""}
           ${containedSquares[idx] ? "bg-green-100" : ""}`;
           return (
@@ -84,7 +83,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         })}
       </div>
       <div>
-        {sudoState.groupRemovers.data.map((i) => (
+        {sudoState.removables.data.map((i) => (
           <div key={`${i.because}${i.contained}`}>{i.because}</div>
         ))}
       </div>

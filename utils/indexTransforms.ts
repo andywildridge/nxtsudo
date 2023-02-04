@@ -1,3 +1,5 @@
+import { GroupType } from "./collections";
+
 type Position = {
   idx: number;
   pos: number;
@@ -61,13 +63,6 @@ const segmentIndeces = (idx: number): Array<number> => {
   }
   return [0, 1, 2].map((i) => start + i * step);
 };
-
-export enum GroupType {
-  row = "row",
-  col = "col",
-  box = "box",
-  segment = "segment",
-}
 
 export const groupIndeces: Record<GroupType, (idx: number) => Array<number>> = {
   row: rowIndeces,

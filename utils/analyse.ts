@@ -13,7 +13,7 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
   const { groups, segments } = processPossibles(possibles);
   const solvableSquare = findSquareSolvable(possibles);
   const segmentRemovers = getSegementDeletors(possibles, segments);
-  const { groupRemovers, solvedSingles } = getGroupClusters(
+  const { removables, solvedSingles } = getGroupClusters(
     possibles,
     groups,
     segmentRemovers
@@ -26,11 +26,8 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     solvable[i.square] = i;
   });
 
-  const removable: Array<{ idx: number; num: number; because: string }> = [];
-
   return {
     solvable,
-    removable,
-    groupRemovers,
+    removables,
   };
 };

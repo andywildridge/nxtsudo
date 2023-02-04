@@ -127,7 +127,7 @@ export const getGroupClusters = (
   }));
 
   return {
-    groupRemovers: removables,
+    removables,
     solvedSingles,
   };
 };
