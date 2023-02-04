@@ -1,9 +1,9 @@
-interface S {
+interface SquareProps {
   solved: number | undefined;
   squarePossibles: number[];
 }
 
-export default function Square({ solved, squarePossibles }: S) {
+export default function Square({ solved, squarePossibles }: SquareProps) {
   return (
     <>
       {solved ?? null}

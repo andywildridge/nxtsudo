@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { setSquare } from "@/interactions/setSquare"; // side fx!
-import { initVals } from "../utils/sudokuSolver";
+import { initPuzzle } from "../utils/sudokuSolver";
 import Square from "./Square";
 
-// placeholder array for builing ui grid
+// placeholder array for iterating 9*9 ui grid
 const grid: ReadonlyArray<null> = new Array(81).fill(null);
 
-export default function Grid() {
-  const [sudoState, setSudoState] = useState(initVals);
+export default function Grid({ puzzle }: { puzzle: string }) {
+  const [sudoState, setSudoState] = useState(initPuzzle(puzzle));
   const [currentSquare, setCurrentSquare] = useState("");
   const [relatedSquares, setRelatedSquares] = useState<Record<number, boolean>>(
     {}
@@ -15,6 +15,7 @@ export default function Grid() {
   const [containedSquares, setContainedSquares] = useState<
     Record<number, boolean>
   >({});
+  console.log(puzzle);
 
   const solveSquare = (idx: number): void => {
     // custom hook?

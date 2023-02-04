@@ -3,6 +3,7 @@ import Head from "next/head";
 import { Inter } from "@next/font/google";
 import styles from "@/styles/Home.module.css";
 import Grid from "../components/Grid";
+import { puzzles } from "@/data/puzzles";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold underline">Sudoku!</h1>
         </div>
         <div className="w-[400px] m-auto ">
-          <Grid />
+          <Grid puzzle={puzzles[0]} />
         </div>
       </main>
     </>
