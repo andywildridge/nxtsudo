@@ -113,7 +113,7 @@ export const getGroupClusters = (
     });
 
     removables.add({
-      because: "group",
+      because: `group ${canRemove}`,
       deletable: canRemove,
       related,
       contained,

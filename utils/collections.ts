@@ -54,7 +54,6 @@ export class CollectionsNumbers extends CollectionsBase<CollectionNumberData> {
 }
 
 interface GroupParams extends GroupIndex {
-  value: number;
   positions: Array<number>;
 }
 
@@ -67,9 +66,9 @@ export class CollectionsGroup extends CollectionsBase<Map<string, GroupData>> {
   constructor() {
     super();
   }
-  add = (params: GroupParams): void => {
+  add = (params: GroupParams, value: number): void => {
     // setter
-    const { type, index, value, positions } = params;
+    const { type, index, positions } = params;
     const keyType = `${type}.${index}`;
     const keyPositions = positions.join();
     if (!this.data.has(keyType)) {

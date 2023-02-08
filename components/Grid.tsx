@@ -2,6 +2,7 @@ import { useState } from "react";
 import { setSquare } from "@/interactions/setSquare"; // side fx!
 import { initPuzzle } from "../utils/sudokuSolver";
 import Square from "./Square";
+import { Removable } from "../utils/Removable";
 
 // placeholder array for iterating 9*9 ui grid
 const grid: ReadonlyArray<null> = new Array(81).fill(null);
@@ -54,6 +55,8 @@ export default function Grid({ puzzle }: { puzzle: string }) {
     setRelatedSquares(related);
     setContainedSquares(contained);
   };
+
+  console.log("dm", sudoState.removables.deleteMap);
   return (
     <>
       <div
@@ -70,6 +73,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
           ${sudoState.removables.indeces[idx] ? "bg-yellow-100" : ""}
           ${relatedSquares[idx] ? "bg-blue-100" : ""}
           ${containedSquares[idx] ? "bg-green-100" : ""}`;
+
           return (
             <div
               className={squareStyle}
@@ -77,7 +81,13 @@ export default function Grid({ puzzle }: { puzzle: string }) {
               onClick={() => solveSquare(idx)}
               onMouseEnter={() => hoverSquare(idx)}
             >
-              <Square {...{ solved, squarePossibles }} />
+              <Square
+                {...{
+                  solved,
+                  squarePossibles,
+                  deletable: sudoState.removables.deleteMap[idx],
+                }}
+              />
             </div>
           );
         })}

@@ -1,4 +1,4 @@
-interface Removable {
+export interface Removable {
   because: string;
   related: number[];
   contained: number[];
@@ -22,6 +22,7 @@ export default class Removables {
     return this.removables;
   }
   get indeces() {
+    //memo
     return this.removables.reduce(
       (acc: Record<number, Record<number, Removable[]>>, removable) => {
         removable.deletable.forEach((idx) => {
@@ -33,7 +34,21 @@ export default class Removables {
           }
           acc[idx.square][idx.number].push(removable);
         });
-
+        return acc;
+      },
+      {}
+    );
+  }
+  get deleteMap() {
+    //memo
+    return this.removables.reduce(
+      (acc: Record<number, number[]>, removable) => {
+        removable.deletable.forEach((idx) => {
+          if (!acc[idx.square]) {
+            acc[idx.square] = [];
+          }
+          acc[idx.square] = [...new Set([...acc[idx.square], idx.number])];
+        });
         return acc;
       },
       {}
