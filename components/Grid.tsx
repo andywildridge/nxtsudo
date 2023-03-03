@@ -2,7 +2,6 @@ import { useState } from "react";
 import { setSquare } from "@/interactions/setSquare"; // side fx!
 import { initPuzzle } from "../utils/sudokuSolver";
 import Square from "./Square";
-import { Removable } from "../utils/Removable";
 
 // placeholder array for iterating 9*9 ui grid
 const grid: ReadonlyArray<null> = new Array(81).fill(null);
@@ -16,7 +15,6 @@ export default function Grid({ puzzle }: { puzzle: string }) {
   const [containedSquares, setContainedSquares] = useState<
     Record<number, boolean>
   >({});
-  console.log(puzzle);
 
   const solveSquare = (idx: number): void => {
     // custom hook?
@@ -40,7 +38,6 @@ export default function Grid({ puzzle }: { puzzle: string }) {
     let contained: Record<number, boolean> = {};
     let because = "";
     if (removers) {
-      console.log(removers);
       Object.keys(removers).forEach((number: string) => {
         removers[Number(number)].forEach((reason) => {
           because += `remo=vable ${reason.because}\n`;
@@ -56,11 +53,12 @@ export default function Grid({ puzzle }: { puzzle: string }) {
     setContainedSquares(contained);
   };
 
-  console.log("dm", sudoState.removables.deleteMap);
+  console.log(sudoState.removables.data);
+
   return (
     <>
       <div
-        className="[&>*:nth-child(odd)]:border-dashed [&>*:nth-child(odd)]:border-2 [&>*:nth-child(odd)]:border-red bcontainer m-auto grid grid-cols-9"
+        className="sudoku-grid bcontainer m-auto grid grid-cols-9"
         onMouseLeave={() => hoverSquare(-1)}
       >
         {grid.map((_: null, idx: number) => {
@@ -76,7 +74,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
 
           return (
             <div
-              className={squareStyle}
+              className={`square ${squareStyle}`}
               key={idx}
               onClick={() => solveSquare(idx)}
               onMouseEnter={() => hoverSquare(idx)}
@@ -86,6 +84,9 @@ export default function Grid({ puzzle }: { puzzle: string }) {
                   solved,
                   squarePossibles,
                   deletable: sudoState.removables.deleteMap[idx],
+                  solvable: sudoState.solvable[idx]
+                    ? sudoState.solvable[idx].number
+                    : undefined,
                 }}
               />
             </div>

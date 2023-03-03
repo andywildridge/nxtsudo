@@ -1,14 +1,14 @@
 import {
-  GroupMapNumberSet,
+  GroupPossibles,
   CollectionsNumbers,
   CollectionsGroup,
   CollectionsClusters,
 } from "./collections";
 
-describe("GroupMapNumberSet", () => {
-  const a = new GroupMapNumberSet();
-  a.add("box.1", 7);
-  a.add("box.1", 5);
+describe("GroupPossibles", () => {
+  const a = new GroupPossibles();
+  a.add({ type: "box", index: 1 }, 7);
+  a.add({ type: "box", index: 1 }, 5);
 
   const row = {
     "box.1": new Set([7, 5]),

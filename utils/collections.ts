@@ -1,7 +1,11 @@
-export type GroupType = "row" | "col" | "box" | "segment";
-
+type GroupType = "row" | "col" | "box";
 //BASE class defn
-class CollectionsBase<CollectionType> {
+interface CollectionsBaseInterface<CollectionType> {
+  values: Map<string, CollectionType>;
+}
+class CollectionsBase<CollectionType>
+  implements CollectionsBaseInterface<CollectionType>
+{
   protected data: Map<string, CollectionType>;
   constructor() {
     this.data = new Map();
@@ -12,12 +16,24 @@ class CollectionsBase<CollectionType> {
   }
 }
 
-export class GroupMapNumberSet extends CollectionsBase<Set<number>> {
+interface GroupAddParams {
+  type: GroupType;
+  index: number;
+}
+interface IsGroupPossibles {
+  add({ type, index }: GroupAddParams, value: number): void;
+} /* For example the numbers a, b, c are in row x */
+
+class GroupPossibles
+  extends CollectionsBase<Set<number>>
+  implements IsGroupPossibles
+{
   constructor() {
     super();
   }
-  add = (key: string, value: number): void => {
+  add = ({ type, index }: GroupAddParams, value: number): void => {
     // setter
+    const key = `${type}.${index}`;
     if (!this.data.has(key)) {
       this.data.set(key, new Set());
     }
@@ -25,18 +41,13 @@ export class GroupMapNumberSet extends CollectionsBase<Set<number>> {
   };
 }
 
-type GroupIndex = {
-  type: GroupType;
-  index: number;
-};
-
-interface CollectionNumberParams extends GroupIndex {
+interface CollectionNumberParams extends GroupAddParams {
   number: number;
 }
 interface CollectionNumberData extends CollectionNumberParams {
   possibles: Set<number>;
-}
-export class CollectionsNumbers extends CollectionsBase<CollectionNumberData> {
+} /* For example number n can appear in row x in positions a, b, c */
+class CollectionsNumbers extends CollectionsBase<CollectionNumberData> {
   constructor() {
     super();
   }
@@ -53,16 +64,17 @@ export class CollectionsNumbers extends CollectionsBase<CollectionNumberData> {
   };
 }
 
-interface GroupParams extends GroupIndex {
+interface GroupParams extends GroupAddParams {
   positions: Array<number>;
 }
 
-export interface GroupData extends GroupIndex {
+export interface GroupData extends GroupAddParams {
   positionCluster: Array<number>;
   canContainNumbers: Set<number>;
 }
 
-export class CollectionsGroup extends CollectionsBase<Map<string, GroupData>> {
+/* For example numbers a, b, c can appear positions aa, bb, cc  */
+class CollectionsGroup extends CollectionsBase<Map<string, GroupData>> {
   constructor() {
     super();
   }
@@ -86,13 +98,28 @@ export class CollectionsGroup extends CollectionsBase<Map<string, GroupData>> {
   };
 }
 
-interface ClusterParams extends GroupIndex {
+interface ClusterParams extends GroupAddParams {
   positions: Array<number>;
 }
-export interface ClusterData extends ClusterParams {
+interface ClusterData extends ClusterParams {
   contains: Set<number>;
 }
-export class CollectionsClusters extends CollectionsBase<ClusterData> {
+
+interface Cluster {
+  type: GroupType;
+  contains: number[];
+  positions: number[];
+  index: number;
+}
+interface IsCollectionClusters {
+  add(params: ClusterParams, value: number): void;
+  singles: Cluster[];
+  groups: Cluster[];
+}
+class CollectionsClusters
+  extends CollectionsBase<ClusterData>
+  implements IsCollectionClusters
+{
   constructor() {
     super();
   }
@@ -133,3 +160,12 @@ export class CollectionsClusters extends CollectionsBase<ClusterData> {
     return this.getCluster((n: number) => n > 1);
   }
 }
+
+export {
+  type GroupType,
+  type ClusterData,
+  CollectionsNumbers,
+  GroupPossibles,
+  CollectionsClusters,
+  CollectionsGroup,
+};

@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.sudoku-grid, .sudoku-grid .square {
+    aspect-ratio: 1 / 1;
+    line-height: 1;
+}
+
+.sudoku-grid {
+    background: url('/grid.svg');
+    background-size: 101.5%;
+}
+
+.sudoku-grid .square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
