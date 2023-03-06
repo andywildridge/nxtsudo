@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { setSquare } from "@/interactions/setSquare"; // side fx!
-import { initPuzzle } from "../utils/sudokuSolver";
 import Square from "./Square";
+import { useSudoku } from "../hooks/useSudoku";
 
 // placeholder array for iterating 9*9 ui grid
 const grid: ReadonlyArray<null> = new Array(81).fill(null);
 
 export default function Grid({ puzzle }: { puzzle: string }) {
-  const [sudoState, setSudoState] = useState(initPuzzle(puzzle));
   const [currentSquare, setCurrentSquare] = useState("");
   const [relatedSquares, setRelatedSquares] = useState<Record<number, boolean>>(
     {}
@@ -16,24 +14,14 @@ export default function Grid({ puzzle }: { puzzle: string }) {
     Record<number, boolean>
   >({});
 
-  const solveSquare = (idx: number): void => {
-    // custom hook?
-    const { solved, possibles, solvable } = sudoState;
-    const newanalysis = setSquare(idx, solvable, solved, possibles);
+  const { state, setSquare } = useSudoku(puzzle);
 
-    if (newanalysis) {
-      setSudoState({
-        ...sudoState,
-        possibles,
-        solved,
-        solvable: newanalysis.solvable,
-        removables: newanalysis.removables,
-      });
-    }
+  const solveSquare = (idx: number): void => {
+    setSquare({ idx, value: state.solvable[idx].number });
   };
 
   const hoverSquare = (idx: number): void => {
-    const removers = sudoState.removables.indeces[idx];
+    const removers = state.removable.indeces[idx];
     let related: Record<number, boolean> = {};
     let contained: Record<number, boolean> = {};
     let because = "";
@@ -45,15 +33,13 @@ export default function Grid({ puzzle }: { puzzle: string }) {
           reason.contained.forEach((r) => (contained[r] = true));
         });
       });
-    } else if (sudoState.solvable[idx]) {
-      because = sudoState.solvable[idx].because;
+    } else if (state.solvable[idx]) {
+      because = state.solvable[idx].because;
     }
     setCurrentSquare(`${because}`);
     setRelatedSquares(related);
     setContainedSquares(contained);
   };
-
-  console.log(sudoState.removables.data);
 
   return (
     <>
@@ -62,13 +48,14 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         onMouseLeave={() => hoverSquare(-1)}
       >
         {grid.map((_: null, idx: number) => {
-          const solved = sudoState.solved.get(idx);
-          const squarePossibles = [...(sudoState.possibles.get(idx) || [])];
+          const solved = state.solved.get(idx);
+          const squarePossibles = [...(state.possibles.get(idx) || [])];
           const squareStyle = `${
-            sudoState.initialClues?.includes(idx) ? "font-bold" : ""
+            //sudoState.initialClues?.includes(idx) ? "font-bold" : ""
+            state.initial.get(idx) ? "font-bold" : ""
           } 
-          ${sudoState.solvable[idx] ? "bg-red-100" : ""} 
-          ${sudoState.removables.indeces[idx] ? "bg-yellow-100" : ""}
+          ${state.solvable[idx] ? "bg-red-100" : ""} 
+          ${state.removable.indeces[idx] ? "bg-yellow-100" : ""}
           ${relatedSquares[idx] ? "bg-blue-100" : ""}
           ${containedSquares[idx] ? "bg-green-100" : ""}`;
 
@@ -83,9 +70,9 @@ export default function Grid({ puzzle }: { puzzle: string }) {
                 {...{
                   solved,
                   squarePossibles,
-                  deletable: sudoState.removables.deleteMap[idx],
-                  solvable: sudoState.solvable[idx]
-                    ? sudoState.solvable[idx].number
+                  deletable: state.removable.deleteMap[idx],
+                  solvable: state.solvable[idx]
+                    ? state.solvable[idx].number
                     : undefined,
                 }}
               />
@@ -94,7 +81,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         })}
       </div>
       <div>
-        {sudoState.removables.data.map((i) => (
+        {state.removable.data.map((i) => (
           <div key={`${i.because}${i.contained}`}>{i.because}</div>
         ))}
       </div>

@@ -1,6 +1,6 @@
-import { getRelatedSquares } from "../utils/indexTransforms";
-import { solvableSquare } from "../utils/analyse";
-import { analyse } from "../utils/analyse";
+import { getRelatedSquares } from "../../utils/indexTransforms";
+import { solvableSquare } from "../../utils/analyse";
+import { analyse } from "../../utils/analyse";
 
 let removePoss = (
   // side effect
