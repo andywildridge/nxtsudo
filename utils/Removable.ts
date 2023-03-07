@@ -5,14 +5,8 @@ export interface Removable {
   deletable: { number: number; square: number }[];
 }
 
-interface Rem {
-  data: Removable;
-  deletable: number[];
-}
-
-interface RemType {}
-
 export default class Removables {
+  //Renaming!
   private removables: Removable[] = [];
   private indecesCache:
     | Record<number, Record<number, Removable[]>>
@@ -20,17 +14,20 @@ export default class Removables {
   private dmCache: Record<number, number[]> | undefined;
 
   add(item: Removable) {
-    // reset cached lookups
+    // reset cached lookups on adding what?
     this.indecesCache = undefined;
-    this.dmCache = undefined;
+    this.dmCache = undefined; // what is dm cache? delete map?...
     this.removables.push(item);
+  }
+  clear() {
+    this.removables = [];
   }
   get data() {
     return this.removables;
   }
   get indeces() {
     if (!this.indecesCache) {
-      console.log("indy called");
+      //console.log("indy called");
       this.indecesCache = this.removables.reduce(
         (acc: Record<number, Record<number, Removable[]>>, removable) => {
           removable.deletable.forEach((idx) => {
@@ -51,7 +48,7 @@ export default class Removables {
   }
   get deleteMap() {
     if (!this.dmCache) {
-      console.log("dm cache");
+      //console.log("dm cache");
       this.dmCache = this.removables.reduce(
         (acc: Record<number, number[]>, removable) => {
           removable.deletable.forEach((idx) => {

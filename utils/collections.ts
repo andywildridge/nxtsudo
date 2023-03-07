@@ -1,4 +1,4 @@
-type GroupType = "row" | "col" | "box";
+type GroupType = "row" | "col" | "box" | "segment";
 //BASE class defn
 interface CollectionsBaseInterface<CollectionType> {
   values: Map<string, CollectionType>;

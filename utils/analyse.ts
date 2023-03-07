@@ -26,6 +26,8 @@ export const analyse = (possibles: ReadonlyMap<number, Set<number>>) => {
     solvable[i.square] = i;
   });
 
+  //console.log("remo", removables);
+
   return {
     solvable,
     removables,

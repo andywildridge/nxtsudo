@@ -1,4 +1,4 @@
-import Removables from "./../utils/Removable";
+import Removables, { Removable } from "./../utils/Removable";
 import { getPossiblesAndSolved } from "@/utils/initFns";
 import { analyse, solvableSquare } from "@/utils/analyse";
 import { getRelatedSquares } from "@/utils/indexTransforms";
@@ -9,7 +9,8 @@ export interface ISolver {
     solved: Map<number, number>;
     possibles: Map<number, Set<number>>;
     solvable: Record<number, solvableSquare>;
-    removable: Removables;
+    removables: Removable[];
+    removableIds: Record<number, Record<number, Removable[]>>;
   };
   setSquare({ idx, value }: { idx: number; value: number }): void;
 }
@@ -20,7 +21,8 @@ export class Solver implements ISolver {
   private _solved: Map<number, number>;
   private _possibles: Map<number, Set<number>>;
   private _solvable: Record<number, solvableSquare> = {};
-  private _removable: Removables = new Removables();
+  private _removables: Removable[] = [];
+  private _removableIds: Record<number, Record<number, Removable[]>> = {};
   private solution: Map<number, number> = new Map();
 
   constructor(puzzle: string) {
@@ -30,26 +32,34 @@ export class Solver implements ISolver {
     this._initial = new Map(solved);
     this._solved = solved;
     this._possibles = possibles;
-    // next step
+
     // can solve?
     const tempState = {
-      _solved: new Map(this._solved),
-      _possibles: new Map(this._possibles),
+      _solved: new Map(solved),
+      _possibles: new Map(possibles),
     };
-    //this.canComplete();
+
+    // deep copy possibles sets
+    tempState._possibles.forEach((possibles: Set<number>, idx: number) => {
+      tempState._possibles.set(idx, new Set([...possibles]));
+    });
+
+    this.canComplete();
 
     this._solved = tempState._solved;
     this._possibles = tempState._possibles;
+
     this.updateAnalysis();
   }
 
   get state() {
     return {
-      initial: this._initial,
-      solved: this._solved,
-      possibles: this._possibles,
-      solvable: this._solvable,
-      removable: this._removable,
+      initial: new Map(this._initial),
+      solved: new Map(this._solved),
+      possibles: new Map(this._possibles),
+      solvable: { ...this._solvable },
+      removables: [...this._removables],
+      removableIds: { ...this._removableIds },
     };
   }
 
@@ -61,7 +71,8 @@ export class Solver implements ISolver {
   updateAnalysis() {
     const { solvable, removables } = analyse(this._possibles);
     this._solvable = solvable;
-    this._removable = removables;
+    this._removables = removables.data;
+    this._removableIds = removables.indeces;
   }
 
   write({ idx, value }: { idx: number; value: number }) {
@@ -80,7 +91,6 @@ export class Solver implements ISolver {
       });
       this.updateAnalysis();
     }
-    console.log("FINISHED", this._solved, this._solvable, this._possibles);
     this.solution = new Map(this._solved);
   }
 
@@ -90,7 +100,7 @@ export class Solver implements ISolver {
     console.log("solution", this.solution);
   }
 
-  removePossible(removable: { idx: number; value: number }[]) {
+  /*removePossible(removable: { idx: number; value: number }[]) {
     removable.forEach((item: { idx: number; value: number }) => {});
-  }
+  }*/
 }

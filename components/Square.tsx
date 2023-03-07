@@ -15,7 +15,10 @@ export default function Square({
     <>
       {solved ?? null}
       {squarePossibles.map((possible: number, idx: number) => (
-        <div className="text-xs inline-block text-red-600" key={idx}>
+        <div
+          className="poss text-xs inline-block text-red-600 opacity-30"
+          key={idx}
+        >
           <span>
             {solvable && solvable === possible && "["}
             {deletable && deletable.includes(possible) && "["}

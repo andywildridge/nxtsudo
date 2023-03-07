@@ -7,12 +7,12 @@ const grid: ReadonlyArray<null> = new Array(81).fill(null);
 
 export default function Grid({ puzzle }: { puzzle: string }) {
   const [currentSquare, setCurrentSquare] = useState("");
-  const [relatedSquares, setRelatedSquares] = useState<Record<number, boolean>>(
+  /*const [relatedSquares, setRelatedSquares] = useState<Record<number, boolean>>(
     {}
   );
   const [containedSquares, setContainedSquares] = useState<
     Record<number, boolean>
-  >({});
+  >({});*/
 
   const { state, setSquare } = useSudoku(puzzle);
 
@@ -21,7 +21,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
   };
 
   const hoverSquare = (idx: number): void => {
-    const removers = state.removable.indeces[idx];
+    /*const removers = false; //state.removable.indeces[idx];
     let related: Record<number, boolean> = {};
     let contained: Record<number, boolean> = {};
     let because = "";
@@ -32,13 +32,13 @@ export default function Grid({ puzzle }: { puzzle: string }) {
           reason.related.forEach((r) => (related[r] = true));
           reason.contained.forEach((r) => (contained[r] = true));
         });
-      });
+      }); 
     } else if (state.solvable[idx]) {
       because = state.solvable[idx].because;
     }
     setCurrentSquare(`${because}`);
     setRelatedSquares(related);
-    setContainedSquares(contained);
+    setContainedSquares(contained);*/
   };
 
   return (
@@ -50,14 +50,13 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         {grid.map((_: null, idx: number) => {
           const solved = state.solved.get(idx);
           const squarePossibles = [...(state.possibles.get(idx) || [])];
-          const squareStyle = `${
-            //sudoState.initialClues?.includes(idx) ? "font-bold" : ""
-            state.initial.get(idx) ? "font-bold" : ""
-          } 
+          const squareStyle = `${state.initial.get(idx) ? "font-bold" : ""} 
           ${state.solvable[idx] ? "bg-red-100" : ""} 
-          ${state.removable.indeces[idx] ? "bg-yellow-100" : ""}
-          ${relatedSquares[idx] ? "bg-blue-100" : ""}
-          ${containedSquares[idx] ? "bg-green-100" : ""}`;
+          ${state.removableIds[idx] ? "bg-yellow-100" : ""}
+          ${/*relatedSquares[idx]*/ 0 ? "bg-blue-100" : ""}
+          ${/*containedSquares[idx]*/ 0 ? "bg-green-100" : ""}
+          ${!solved ? "poss" : ""}
+          `;
 
           return (
             <div
@@ -70,7 +69,7 @@ export default function Grid({ puzzle }: { puzzle: string }) {
                 {...{
                   solved,
                   squarePossibles,
-                  deletable: state.removable.deleteMap[idx],
+                  deletable: [], //state.removable.deleteMap[idx],
                   solvable: state.solvable[idx]
                     ? state.solvable[idx].number
                     : undefined,
@@ -81,9 +80,9 @@ export default function Grid({ puzzle }: { puzzle: string }) {
         })}
       </div>
       <div>
-        {state.removable.data.map((i) => (
+        {/*state.removable.data.map((i) => (
           <div key={`${i.because}${i.contained}`}>{i.because}</div>
-        ))}
+        ))*/}
       </div>
       <div>{currentSquare}</div>
     </>
